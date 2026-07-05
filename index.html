@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心靈連結之旅 - 深度對話牌卡遊戲</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 3D Card Flip CSS */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    
+    /* Elegant Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Ambient Pulsing Background Glows */
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.15); opacity: 0.6; }
+    }
+    .ambient-glow-1 {
+      animation: pulseGlow 15s infinite ease-in-out;
+    }
+    .ambient-glow-2 {
+      animation: pulseGlow 12s infinite ease-in-out 3s;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient background graphics -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 blur-[100px] ambient-glow-1"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-gradient-to-br from-rose-600 to-pink-600 blur-[100px] ambient-glow-2"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-5xl rounded-full bg-slate-950/20 pointer-events-none border border-slate-800/40"></div>
+  </div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-4 py-6 md:py-10 flex flex-col min-h-screen">
+    
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-800 pb-6 gap-4">
+      <div class="text-center md:text-left">
+        <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-400 via-pink-400 to-rose-400 bg-clip-text text-transparent flex items-center justify-center md:justify-start gap-3">
+          <span>✨ 心靈連結之旅</span>
+          <span class="text-sm px-2.5 py-0.5 rounded-full bg-slate-800/80 border border-indigo-500/30 text-indigo-300 font-medium">深度牌卡遊戲</span>
+        </h1>
+        <p class="text-xs md:text-sm text-slate-400 mt-1.5 tracking-wider">打破隔閡，從輕鬆破冰到深度靈魂共鳴的對話工具</p>
+      </div>
+
+
+    </header>
+
+    <!-- Main Container -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-grow">
+      
+      <!-- Left Column: Settings, Players, Statistics -->
+      <section class="lg:col-span-4 space-y-6">
+        
+        <!-- Deck Settings Box -->
+        <div class="bg-slate-800/50 border border-slate-700/40 p-5 rounded-3xl backdrop-blur-md shadow-xl">
+          <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+            1. 選擇要加入的卡組
+          </h2>
+          <div class="space-y-3">
+            <!-- Warmup Deck -->
+            <label class="flex items-center justify-between p-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-all cursor-pointer select-none">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" id="deck_warmup" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-rose-500 focus:ring-rose-500/50 bg-slate-800 border-slate-600">
+                <span class="text-sm font-semibold text-rose-300">暖身破冰</span>
+              </div>
+              <span id="count_warmup" class="text-xs font-mono bg-rose-500/20 text-rose-300 px-2.5 py-0.5 rounded-full">0/10</span>
+            </label>
+            
+            <!-- 1 Star Deck -->
+            <label class="flex items-center justify-between p-3 rounded-2xl border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 transition-all cursor-pointer select-none">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" id="deck_one_star" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-teal-500 focus:ring-teal-500/50 bg-slate-800 border-slate-600">
+                <span class="text-sm font-semibold text-teal-300">一星連結</span>
+              </div>
+              <span id="count_one_star" class="text-xs font-mono bg-teal-500/20 text-teal-300 px-2.5 py-0.5 rounded-full">0/20</span>
+            </label>
+
+            <!-- 2 Star Deck -->
+            <label class="flex items-center justify-between p-3 rounded-2xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-all cursor-pointer select-none">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" id="deck_two_star" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-blue-500 focus:ring-blue-500/50 bg-slate-800 border-slate-600">
+                <span class="text-sm font-semibold text-blue-300">二星連結</span>
+              </div>
+              <span id="count_two_star" class="text-xs font-mono bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full">0/20</span>
+            </label>
+
+            <!-- 3 Star Deck -->
+            <label class="flex items-center justify-between p-3 rounded-2xl border border-purple-500/20 bg-purple-500/5 hover:bg-purple-500/10 transition-all cursor-pointer select-none">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" id="deck_three_star" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-purple-500 focus:ring-purple-500/50 bg-slate-800 border-slate-600">
+                <span class="text-sm font-semibold text-purple-300">三星連結</span>
+              </div>
+              <span id="count_three_star" class="text-xs font-mono bg-purple-500/20 text-purple-300 px-2.5 py-0.5 rounded-full">0/20</span>
+            </label>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-3 italic text-center">※ 可複選！系統將會在所勾選的牌組中隨機抽選。</p>
+        </div>
+
+
+
+        <!-- Stats / Quick Operations -->
+        <div class="bg-slate-800/50 border border-slate-700/40 p-5 rounded-3xl backdrop-blur-md shadow-xl flex justify-between items-center">
+          <div class="space-y-1">
+            <div class="text-xs text-slate-400">當前混合牌組總計</div>
+            <div id="totalPoolCount" class="text-xl font-bold text-slate-200">0 / 70 <span class="text-xs text-slate-500 font-normal">張卡片</span></div>
+          </div>
+          <button onclick="resetDecks()" class="px-3 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600/50 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17" />
+            </svg>
+            重置全部卡組
+          </button>
+        </div>
+
+        <!-- Custom Card Add Box -->
+        <div class="bg-slate-800/50 border border-amber-500/20 p-5 rounded-3xl backdrop-blur-md shadow-xl space-y-4">
+          <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            ✏️ 新增自訂牌卡
+          </h2>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">問題內容 <span class="text-rose-400">*</span></label>
+              <textarea id="customCardZh" rows="2" placeholder="輸入你的問題..." class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:outline-none rounded-xl px-3.5 py-2 text-sm text-slate-200 transition resize-none"></textarea>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">英文翻譯（選填）</label>
+              <input type="text" id="customCardEn" placeholder="English translation (optional)" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:outline-none rounded-xl px-3.5 py-2 text-sm text-slate-200 transition">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">加入哪個卡組</label>
+              <select id="customCardDeck" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:outline-none rounded-xl px-3.5 py-2 text-sm text-slate-200 transition">
+                <option value="warmup">暖身破冰</option>
+                <option value="one_star">一星連結</option>
+                <option value="two_star">二星連結</option>
+                <option value="three_star">三星連結</option>
+              </select>
+            </div>
+            <button onclick="addCustomCard()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-amber-500/20 active:scale-95">
+              ➕ 新增到牌組
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 italic text-center">※ 自訂卡片儲存在此瀏覽器，關掉再開還在！</p>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Card Interactive Area -->
+      <section class="lg:col-span-8 flex flex-col items-center justify-center space-y-6">
+        
+        <!-- The Main 3D Card Slot -->
+        <div class="w-full max-w-lg aspect-[3/4] md:aspect-[4/5] perspective-1000 relative">
+          
+          <div id="cardFlipper" class="w-full h-full preserve-3d transition-transform duration-500 cursor-pointer relative" onclick="triggerCardFlip()">
+            
+            <!-- CARD FRONT (Cover / Mystery Face) -->
+            <div class="absolute inset-0 w-full h-full rounded-[32px] p-6 bg-gradient-to-br from-slate-800 to-slate-950 border-2 border-slate-700/60 shadow-2xl flex flex-col justify-between backface-hidden select-none">
+              
+              <!-- Top Bar of Cover -->
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-extrabold tracking-widest text-slate-500 uppercase">SOUL DIALOGUE DECK</span>
+                <span class="text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full font-bold">隨機待抽</span>
+              </div>
+
+              <!-- Center Graphic -->
+              <div class="flex-grow flex flex-col items-center justify-center text-center space-y-4">
+                <!-- Gorgeous geometric design using SVG instead of external images -->
+                <div class="w-28 h-28 relative flex items-center justify-center">
+                  <div class="absolute inset-0 bg-indigo-500/10 rounded-full blur-xl animate-pulse"></div>
+                  <!-- SVG Sacred Geometry -->
+                  <svg class="w-20 h-20 text-indigo-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                    <circle cx="12" cy="12" r="7" stroke-dasharray="2 2" />
+                  </svg>
+                </div>
+                <div class="space-y-1">
+                  <h3 class="text-xl font-bold bg-gradient-to-r from-indigo-300 via-pink-300 to-rose-300 bg-clip-text text-transparent">點擊抽取或翻轉</h3>
+                  <p class="text-xs text-slate-400 max-w-xs mx-auto">Click "Draw Card" below, then tap here to flip and read the prompt.</p>
+                </div>
+              </div>
+
+              <!-- Card Cover Footer -->
+              <div class="border-t border-slate-800/80 pt-4 text-center">
+                <span class="text-[10px] text-slate-500 tracking-wider">探索彼此內心深處那顆閃爍的星</span>
+              </div>
+            </div>
+
+            <!-- CARD BACK (Content Face) -->
+            <div id="cardBackFace" class="absolute inset-0 w-full h-full rounded-[32px] p-6 bg-slate-900 border-2 border-indigo-500 shadow-2xl flex flex-col justify-between backface-hidden rotate-y-180 select-none">
+              
+              <!-- Top Info Bar -->
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <span id="cardBadgeColor" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                  <span id="cardCategoryName" class="text-sm font-bold text-slate-300">暖身破冰</span>
+                </div>
+                <span id="cardIndexLabel" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">#0</span>
+              </div>
+
+              <!-- Question Body -->
+              <div class="flex-grow flex flex-col justify-center py-6">
+                <p id="cardQuestionZh" class="text-xl md:text-2xl font-black text-slate-100 leading-relaxed text-center drop-shadow">
+                  請先點擊下方抽牌鈕開始！
+                </p>
+              </div>
+
+              <!-- Card Footer -->
+              <div class="border-t border-slate-800/80 pt-4 flex justify-between items-center text-xs text-slate-400">
+                <span id="currentDrawerDisplay">抽卡人：玩家</span>
+                <span class="text-[10px] text-slate-500">對話交流中 💬</span>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Draw Button Panel -->
+        <div class="w-full max-w-lg">
+          <button id="drawBtn" onclick="drawCard()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white font-extrabold text-base md:text-lg transition shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/30 active:scale-95 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+            隨機抽取下一張卡
+          </button>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- Bottom Widgets Panel: Favorite cards & History logs & YouTube Music Embedding -->
+    <section class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-800 pt-8">
+      
+      <!-- Drew Card History Log -->
+      <div class="bg-slate-800/30 border border-slate-800 p-5 rounded-3xl">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-base font-bold text-slate-200 flex items-center gap-2">
+            📚 抽取歷史
+          </h3>
+          <span id="historyCount" class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">已抽取 0 張</span>
+        </div>
+        <div id="historyLogList" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-sm">
+          <p class="text-xs text-slate-500 italic text-center py-6">尚無抽取歷史，開始抽取後，卡片將記錄於此。</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Custom Cards Management Section -->
+    <section id="customCardsSection" class="mt-8 border-t border-slate-800 pt-8 hidden">
+      <div class="bg-slate-800/30 border border-amber-500/20 p-5 rounded-3xl">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-base font-bold text-slate-200 flex items-center gap-2">
+            ✏️ 我的自訂牌卡
+          </h3>
+          <span id="customCardCount" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">0 張</span>
+        </div>
+        <div id="customCardList" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-sm">
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- Custom Modal/Dialog replacement for Alert -->
+    <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-200 opacity-0 pointer-events-none">
+      <div class="bg-slate-900 border border-slate-700/60 p-6 rounded-3xl max-w-sm w-full shadow-2xl space-y-4">
+        <h4 id="modalTitle" class="text-lg font-bold text-slate-200">提醒</h4>
+        <p id="modalMessage" class="text-sm text-slate-400 leading-relaxed">訊息內容</p>
+        <div class="flex justify-end">
+          <button onclick="closeModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition">
+            我知道了
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Copyright -->
+    <footer class="mt-auto pt-8 pb-4 text-center text-xs text-slate-500 border-t border-slate-800/40">
+      <p>© 2026 心靈對話設計坊 - 深呼吸，勇敢分享。無盡星空，聽你說故事。</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // ------------------------------------------------------------------
+    // Card Dataset Initialization
+    // ------------------------------------------------------------------
+    const CARD_DATA = {
+      warmup: {
+        id: "warmup",
+        name: "暖身破冰",
+        badgeColor: "bg-rose-500",
+        colorClass: "from-rose-500 to-rose-600",
+        cards: [
+          { zh: "全員來一張大合照，並且分享到社群上！" },
+          { zh: "由抽牌者選出兩人，各自做出最誇張的表情，拍照留念！" },
+          { zh: "每個人說出今天讓你心存感謝的兩件事。" },
+          { zh: "打開相簿，找一張近期拍的照片，跟大家說說背後的故事。" },
+          { zh: "在別人眼中你是什麼樣的人？你有沒有做過讓大家意外、和這個形象完全相反的事？（全員回答）" },
+          { zh: "你平時用什麼方式讓身邊的人感受到你的關心？" },
+          { zh: "說出一句曾經讓你很有感觸、深深影響你的話，並告訴大家為什麼。" },
+          { zh: "翻出一張你小時候的照片，讓大家看看你的過去！" },
+          { zh: "每人想三個最能代表自己的關鍵詞，輪流告訴大家你為什麼選這些詞。" },
+          { zh: "每個人用十秒鐘哼唱或唱出自己最愛的一首歌。" }
+        ]
+      },
+      one_star: {
+        id: "one_star",
+        name: "一星連結 ⭐",
+        badgeColor: "bg-teal-500",
+        colorClass: "from-teal-500 to-emerald-600",
+        cards: [
+          { zh: "在人際往來中，你覺得自己最厲害的一面是什麼？" },
+          { zh: "最近有什麼事讓你覺得自己很幸運，說來聽聽？" },
+          { zh: "有沒有哪本書或電影，讓你看完之後久久無法忘懷？" },
+          { zh: "什麼樣的禮物最能讓你感到開心和被用心對待？" },
+          { zh: "請在場每個人說說，第一次見到抽牌者時，你腦海中浮現的第一個念頭是什麼？" },
+          { zh: "回想你的童年，有哪一個畫面或事件讓你至今記憶猶新？" },
+          { zh: "聊聊你踏入職場的第一份工作，當時心情如何？有什麼難忘的經歷嗎？" },
+          { zh: "如果可以穿越回人生的某個年紀重新來過，你會選哪個時期？" },
+          { zh: "你童年最著迷的一部卡通或動畫是哪一部？" },
+          { zh: "當你感到疲憊或壓力大時，最能讓你充電放鬆的方式是什麼？" },
+          { zh: "請在場每個人，對抽牌者說一句最想說的話——可以是謝謝、讚美，或是一個祝福。" },
+          { zh: "假設可以邀請任何一位名人共進晚餐，你會選誰？為什麼？" },
+          { zh: "最近的生活有帶給你什麼新的領悟或想法嗎？說出來和大家分享。" },
+          { zh: "你希望在生活中養成什麼新習慣，但一直還沒開始？" },
+          { zh: "最近有什麼事讓你忍不住大笑，或是讓你心情特別好的瞬間？" },
+          { zh: "假設你能在一瞬間習得任何一種技能或才藝，你最想要哪一樣？" },
+          { zh: "你認為自己偏外向還是內向？可以舉個例子來說明嗎？" },
+          { zh: "在你看來，讓一段友誼長久維繫最關鍵的事是什麼？" },
+          { zh: "分享一段你珍視的文字或語錄，說說它如何在你心中留下印記。" },
+          { zh: "在忙碌的工作或學業之外，你最喜歡用什麼方式讓自己喘口氣？" }
+        ]
+      },
+      two_star: {
+        id: "two_star",
+        name: "二星連結 ⭐⭐",
+        badgeColor: "bg-blue-500",
+        colorClass: "from-blue-500 to-indigo-600",
+        cards: [
+          { zh: "回顧至今，你覺得自己在哪個層面改變最大？這個改變有沒有特定的轉捩點或某個人的影響？" },
+          { zh: "選擇在場的一個人，具體說出他讓你欣賞的地方，以及他如何影響了你。" },
+          { zh: "在場的人，你覺得自己和抽牌者有哪些共同點？可能是個性、習慣或說話方式。（全員回答）" },
+          { zh: "你自己最滿意、最想讓別人看見的個人特質是哪一個？" },
+          { zh: "遇到什麼狀況你最容易動怒？當你生氣時，你通常怎麼處理這份情緒？" },
+          { zh: "有什麼事你清楚知道自己應該改，卻一直拖著、對自己說「以後再說」？" },
+          { zh: "最近有沒有哪個人的一句話或一個舉動，讓你心裡覺得「這個人真的了解我」？" },
+          { zh: "說說你曾經面對一件讓你很害怕的事，最後是怎麼撐過去的？" },
+          { zh: "最近有沒有哪個瞬間，讓你差點或真的流下眼淚？" },
+          { zh: "你目前生活中最享受、最珍惜的是哪個部分？那件事對你來說意義是什麼？" },
+          { zh: "說出一個你真實感受到自己被看見、被肯定的時刻，那個人看到了你的哪些優點？" },
+          { zh: "你有沒有對家人隱瞞過什麼事？當時為什麼選擇不說實話？" },
+          { zh: "你習慣用什麼方式讓對你重要的人感受到你的在乎？他們能接收到你的心意嗎？" },
+          { zh: "有沒有哪次你的感受或需要，被一個你在乎的人漠視了？那時你是怎麼回應的？" },
+          { zh: "曾經有什麼事讓你傷透了心，但現在回頭看，你已經可以平靜甚至感謝它的存在？" },
+          { zh: "你覺得自己在家裡扮演什麼樣的角色？家人們眼中的你，和你自己認知的一樣嗎？" },
+          { zh: "在場找一個人，真誠地說出你對他的感謝，然後給他一個擁抱。" },
+          { zh: "假如完全不用擔心別人的眼光或反對，你最渴望去做的一件事是什麼？" },
+          { zh: "在你心目中，一段真正美好的關係應該有哪些核心要素？" },
+          { zh: "如果要向一個完全不認識的人介紹抽牌者，你會怎麼形容他？（全員回答）" }
+        ]
+      },
+      three_star: {
+        id: "three_star",
+        name: "三星連結 ⭐⭐⭐",
+        badgeColor: "bg-purple-500",
+        colorClass: "from-purple-500 to-violet-600",
+        cards: [
+          { zh: "如果能抹去人生中的某段記憶，你會選哪一段？如果重新經歷，你想做出什麼不同的選擇？" },
+          { zh: "你心裡有沒有一件一直想做卻遲遲沒有行動的事？是什麼讓你還沒踏出那一步？" },
+          { zh: "回顧你的人生，哪一件事的完成讓你最感到驕傲？你是怎麼做到的？" },
+          { zh: "過去這一年，你在哪個方面感覺自己有了最明顯的蛻變？" },
+          { zh: "在人與人的關係中，你最希望對方珍視你的哪一點？你自己也會這樣對待他人嗎？" },
+          { zh: "如果可以重新來過，你最想修復或重建的是和哪個人的關係？你希望那段關係有什麼不同？" },
+          { zh: "當你陷入低谷或面對巨大壓力時，你靠什麼重新站起來？" },
+          { zh: "在和別人相處的過程中，你最引以為傲的是自己哪一面？你是怎麼意識到這一點的？" },
+          { zh: "說一件你曾拼盡全力去完成的事，是什麼驅動你這樣做？完成後你有什麼感受？" },
+          { zh: "此刻如果可以對某個人說一聲「對不起」或「謝謝你」，那個人是誰？" },
+          { zh: "如果有一整天只屬於你自己，你會如何安排這一天讓自己完全充電？" },
+          { zh: "近期有沒有什麼事讓你心裡一直有一份愧疚感沒有消散？" },
+          { zh: "你人生中哪一個瞬間，讓你感覺到最深刻、最純粹的幸福？那是什麼樣的畫面？" },
+          { zh: "你這輩子做過最需要勇氣的一個決定是什麼？做那個決定時你心裡是什麼感受？" },
+          { zh: "在你的人生中，有沒有某個經歷讓你重新看見了自己？那是你的哪個轉折點？" },
+          { zh: "在你的家庭關係裡，你最希望能有所不同的是哪個部分？改變它最大的阻力是什麼？" },
+          { zh: "你和爸爸或媽媽之間，有哪一個讓你至今印象深刻的回憶？" },
+          { zh: "如果生命走到了盡頭，你最慶幸自己曾經做出過的一個選擇是什麼？" },
+          { zh: "說說你現在正在面對的最大挑戰或困境，是什麼讓你卡住了？你覺得突破口在哪裡？" },
+          { zh: "說出一次讓你刻骨銘心的失敗，當時你有什麼感受？現在的你如何看待那段經歷？" }
+        ]
+      }
+    };
+
+    // ------------------------------------------------------------------
+    // State Management Variables
+    // ------------------------------------------------------------------
+    let drawPools = {
+      warmup: [],
+      one_star: [],
+      two_star: [],
+      three_star: []
+    };
+    
+    let activeCategories = ["warmup", "one_star", "two_star", "three_star"];
+    let currentCard = null;
+    let isFlipped = false;
+    let players = [];
+    let currentPlayerIndex = 0;
+    let soundEnabled = true;
+    let historyList = [];
+
+    // Custom Cards (persisted in localStorage)
+    const CUSTOM_CARDS_KEY = 'soul_dialogue_custom_cards';
+    let customCards = [];
+
+    // Synthesized Audio Context (Web Audio API)
+    let audioCtx = null;
+
+    // ------------------------------------------------------------------
+    // Event Listeners & Bootstrapping
+    // ------------------------------------------------------------------
+    window.onload = function() {
+      // Load custom cards from localStorage
+      loadCustomCardsFromStorage();
+      // Setup initial draw pools
+      resetDecks(false);
+      updateStatistics();
+      renderCustomCardList();
+    };
+
+    // ------------------------------------------------------------------
+    // Custom Card - localStorage helpers
+    // ------------------------------------------------------------------
+    function loadCustomCardsFromStorage() {
+      try {
+        const stored = localStorage.getItem(CUSTOM_CARDS_KEY);
+        customCards = stored ? JSON.parse(stored) : [];
+      } catch(e) {
+        customCards = [];
+      }
+    }
+
+    function saveCustomCardsToStorage() {
+      localStorage.setItem(CUSTOM_CARDS_KEY, JSON.stringify(customCards));
+    }
+
+    function addCustomCard() {
+      const zhInput = document.getElementById('customCardZh');
+      const enInput = document.getElementById('customCardEn');
+      const deckSelect = document.getElementById('customCardDeck');
+
+      const zh = zhInput.value.trim();
+      const en = enInput.value.trim() || '（自訂卡片）';
+      const deck = deckSelect.value;
+
+      if (!zh) {
+        showCustomModal('請填寫問題', '自訂牌卡的問題內容不能為空！');
+        return;
+      }
+
+      const newCard = { zh, en, deck, id: Date.now() };
+      customCards.push(newCard);
+      saveCustomCardsToStorage();
+
+      // Also add to the live draw pool immediately
+      drawPools[deck].push({ zh, en, custom: true, id: newCard.id });
+
+      zhInput.value = '';
+      enInput.value = '';
+
+      updateStatistics();
+      renderCustomCardList();
+      playSound('success');
+      showCustomModal('新增成功！', `「${zh.slice(0,20)}${zh.length>20?'…':''}」已加入「${CARD_DATA[deck].name}」牌組，並儲存在此瀏覽器中。`);
+    }
+
+    function deleteCustomCard(id) {
+      const card = customCards.find(c => c.id === id);
+      customCards = customCards.filter(c => c.id !== id);
+      saveCustomCardsToStorage();
+
+      // Remove from live draw pool if still there
+      if (card) {
+        drawPools[card.deck] = drawPools[card.deck].filter(c => c.id !== id);
+      }
+
+      updateStatistics();
+      renderCustomCardList();
+      playSound('flip');
+    }
+
+    function renderCustomCardList() {
+      const section = document.getElementById('customCardsSection');
+      const container = document.getElementById('customCardList');
+      const countLabel = document.getElementById('customCardCount');
+
+      if (customCards.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      section.classList.remove('hidden');
+      countLabel.innerText = `${customCards.length} 張`;
+      container.innerHTML = '';
+
+      customCards.forEach(card => {
+        const deckInfo = CARD_DATA[card.deck];
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-slate-800/40 border border-amber-500/10 hover:border-amber-500/30 rounded-2xl transition duration-150 flex justify-between items-start gap-2';
+        div.innerHTML = `
+          <div class="flex flex-col gap-1 flex-grow">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-2 h-2 rounded-full ${deckInfo.badgeColor}"></span>
+              <span class="text-slate-400 font-bold">${deckInfo.name}</span>
+              <span class="text-amber-400 text-[10px]">✏️ 自訂</span>
+            </div>
+            <div class="text-slate-200 text-xs font-semibold">${card.zh}</div>
+            <div class="text-[10px] text-slate-500 font-serif italic">${card.en}</div>
+          </div>
+          <button onclick="deleteCustomCard(${card.id})" class="text-slate-500 hover:text-rose-400 p-1 shrink-0 transition" title="刪除此自訂卡">
+            🗑️
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Initialize Web Audio API on first interaction
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Play procedural/synthesized synth sounds
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'flip') {
+          // Soft swoop sound
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.25);
+        } else if (type === 'draw') {
+          // Energetic high ping
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.2);
+        } else if (type === 'success') {
+          // Double cheery pulse
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+          gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        }
+      } catch (e) {
+        console.warn("Audio synthesis error: ", e);
+      }
+    }
+
+    // Toggle global system sound
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const soundIcon = document.getElementById("soundIcon");
+      if (soundEnabled) {
+        soundIcon.innerHTML = `
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5L6.855 11H5a1 1 0 110-2h1.855l2.278-3.5A1 1 0 0111 6v8a1 1 0 01-1.867.5L6.855 11H5a1 1 0 110-2h1.855l2.278-3.5A1 1 0 0110 7z" clip-rule="evenodd" />
+        `;
+        document.getElementById("soundToggleBtn").classList.remove("opacity-50");
+      } else {
+        soundIcon.innerHTML = `
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5L6.855 11H5a1 1 0 110-2h1.855l2.278-3.5A1 1 0 0111 6v8a1 1 0 01-1.867.5L6.855 11H5a1 1 0 110-2h1.855l2.278-3.5A1 1 0 0110 7zm-5.121 2.879a3 3 0 00-4.242 4.242 1 1 0 11-1.414 1.414 5 5 0 017.072-7.072 1 1 0 11-1.414 1.414z" clip-rule="evenodd" />
+        `;
+        document.getElementById("soundToggleBtn").classList.add("opacity-50");
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Setup and Statistics Helpers
+    // ------------------------------------------------------------------
+    function resetDecks(showAlert = true) {
+      Object.keys(CARD_DATA).forEach(cat => {
+        // Deep copy built-in cards
+        drawPools[cat] = [...CARD_DATA[cat].cards];
+        // Also re-add custom cards for this category
+        customCards.filter(c => c.deck === cat).forEach(c => {
+          drawPools[cat].push({ zh: c.zh, en: c.en, custom: true, id: c.id });
+        });
+      });
+      
+      updateStatistics();
+      
+      if (showAlert) {
+        showCustomModal("重置成功", "已為您將所有卡組重新洗牌。卡池恢復完整狀態（含自訂牌卡）！");
+        playSound('success');
+      }
+    }
+
+    function updateStatistics() {
+      const customPerDeck = {};
+      customCards.forEach(c => {
+        customPerDeck[c.deck] = (customPerDeck[c.deck] || 0) + 1;
+      });
+
+      const wCount = drawPools.warmup.length;
+      const oCount = drawPools.one_star.length;
+      const tCount = drawPools.two_star.length;
+      const thCount = drawPools.three_star.length;
+
+      const wMax = 10 + (customPerDeck.warmup || 0);
+      const oMax = 20 + (customPerDeck.one_star || 0);
+      const tMax = 20 + (customPerDeck.two_star || 0);
+      const thMax = 20 + (customPerDeck.three_star || 0);
+
+      document.getElementById("count_warmup").innerText = `${wCount}/${wMax}`;
+      document.getElementById("count_one_star").innerText = `${oCount}/${oMax}`;
+      document.getElementById("count_two_star").innerText = `${tCount}/${tMax}`;
+      document.getElementById("count_three_star").innerText = `${thCount}/${thMax}`;
+
+      // Update total remaining checked cards
+      let total = 0;
+      let maxTotal = 0;
+      activeCategories.forEach(cat => {
+        const builtIn = CARD_DATA[cat].cards.length;
+        const custom = customPerDeck[cat] || 0;
+        total += drawPools[cat].length;
+        maxTotal += builtIn + custom;
+      });
+
+      document.getElementById("totalPoolCount").innerHTML = `${total} / ${maxTotal} <span class="text-xs text-slate-500 font-normal">張卡片</span>`;
+    }
+
+    function handleCategoryChange() {
+      const active = [];
+      if (document.getElementById("deck_warmup").checked) active.push("warmup");
+      if (document.getElementById("deck_one_star").checked) active.push("one_star");
+      if (document.getElementById("deck_two_star").checked) active.push("two_star");
+      if (document.getElementById("deck_three_star").checked) active.push("three_star");
+
+      activeCategories = active;
+      updateStatistics();
+    }
+
+    // ------------------------------------------------------------------
+    // Modal Controller
+    // ------------------------------------------------------------------
+    function showCustomModal(title, msg) {
+      document.getElementById("modalTitle").innerText = title;
+      document.getElementById("modalMessage").innerText = msg;
+      
+      const modal = document.getElementById("customModal");
+      modal.classList.remove("pointer-events-none");
+      modal.classList.add("opacity-100");
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("customModal");
+      modal.classList.add("pointer-events-none");
+      modal.classList.remove("opacity-100");
+    }
+
+    // ------------------------------------------------------------------
+    // Player Management
+    // ------------------------------------------------------------------
+    function addPlayer() {
+      const input = document.getElementById("playerNameInput");
+      const name = input.value.trim();
+      if (!name) return;
+
+      if (players.includes(name)) {
+        showCustomModal("貼心提醒", "已存在同名玩家，請輸入不同名字以利辨識。");
+        return;
+      }
+
+      players.push(name);
+      input.value = "";
+      renderPlayers();
+      playSound('success');
+    }
+
+    function removePlayer(index) {
+      players.splice(index, 1);
+      if (currentPlayerIndex >= players.length) {
+        currentPlayerIndex = 0;
+      }
+      renderPlayers();
+    }
+
+    function renderPlayers() {
+      const container = document.getElementById("playerListContainer");
+      const hint = document.getElementById("noPlayersHint");
+      const turnDisplay = document.getElementById("turnDisplayPanel");
+      const indicator = document.getElementById("activePlayerIndicator");
+
+      // Empty container first
+      container.innerHTML = "";
+
+      if (players.length === 0) {
+        hint.classList.remove("hidden");
+        turnDisplay.classList.add("hidden");
+        indicator.classList.add("hidden");
+        return;
+      }
+
+      hint.classList.add("hidden");
+      turnDisplay.classList.remove("hidden");
+      indicator.classList.remove("hidden");
+
+      players.forEach((player, idx) => {
+        const isCurrent = idx === currentPlayerIndex;
+        const playerBtn = document.createElement("div");
+        playerBtn.className = `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold cursor-default transition-all ${
+          isCurrent 
+            ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-800' 
+            : 'bg-slate-800 hover:bg-slate-700/80 text-slate-300 border border-slate-700/50'
+        }`;
+        
+        playerBtn.innerHTML = `
+          <span>👤 ${player}</span>
+          <button onclick="event.stopPropagation(); removePlayer(${idx})" class="hover:text-red-400 font-bold ml-1 text-[11px]" title="刪除此玩家">✕</button>
+        `;
+        container.appendChild(playerBtn);
+      });
+
+      // Update current turn texts
+      document.getElementById("currentPlayerName").innerText = `👤 ${players[currentPlayerIndex]}`;
+      const nextIndex = (currentPlayerIndex + 1) % players.length;
+      document.getElementById("nextPlayerName").innerText = players[nextIndex];
+    }
+
+    function advancePlayerTurn() {
+      if (players.length === 0) return;
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+      renderPlayers();
+    }
+
+    function skipTurn() {
+      if (players.length === 0) return;
+      advancePlayerTurn();
+      playSound('flip');
+    }
+
+    // ------------------------------------------------------------------
+    // Card Drawing & Flipping Logic
+    // ------------------------------------------------------------------
+    function drawCard() {
+      if (activeCategories.length === 0) {
+        showCustomModal("請勾選卡組", "請在左側至少勾選一個難度的卡牌，才能開始抽取！");
+        return;
+      }
+
+      // Filter available non-empty categories
+      const availableCategories = activeCategories.filter(cat => drawPools[cat].length > 0);
+
+      // If all selected categories are empty, automatic reload warning
+      if (availableCategories.length === 0) {
+        showCustomModal("卡池抽空囉！", "您勾選的卡組皆已全數抽取完畢！系統將會自動重置您勾選的卡組，讓您繼續玩得盡興。");
+        activeCategories.forEach(cat => {
+          drawPools[cat] = [...CARD_DATA[cat].cards];
+        });
+        updateStatistics();
+        return;
+      }
+
+      // Pick a random category from the valid options
+      const selectedCategoryKey = availableCategories[Math.floor(Math.random() * availableCategories.length)];
+      const currentCategoryPool = drawPools[selectedCategoryKey];
+
+      // Pick a random card from that pool
+      const cardIndexInPool = Math.floor(Math.random() * currentCategoryPool.length);
+      const cardObj = currentCategoryPool[cardIndexInPool];
+
+      // Remove the selected card from the pool so we don't repeat it
+      currentCategoryPool.splice(cardIndexInPool, 1);
+
+      // Setup current card state
+      const builtInCount = CARD_DATA[selectedCategoryKey].cards.length;
+      const customCount = customCards.filter(c => c.deck === selectedCategoryKey).length;
+      currentCard = {
+        categoryKey: selectedCategoryKey,
+        categoryName: CARD_DATA[selectedCategoryKey].name,
+        badgeColor: CARD_DATA[selectedCategoryKey].badgeColor,
+        zh: cardObj.zh,
+        en: cardObj.en,
+        isCustom: !!cardObj.custom,
+        index: (builtInCount + customCount) - currentCategoryPool.length
+      };
+
+      // Set player name if multi-player mode
+      let drawerText = "抽卡人：自由討論";
+      if (players.length > 0) {
+        drawerText = `👤 抽卡人：${players[currentPlayerIndex]}`;
+      }
+
+      // Sync Card Back DOM elements
+      document.getElementById("cardCategoryName").innerText = currentCard.categoryName;
+      document.getElementById("cardBadgeColor").className = `w-2.5 h-2.5 rounded-full ${currentCard.badgeColor}`;
+      document.getElementById("cardQuestionZh").innerText = currentCard.zh;
+      document.getElementById("cardQuestionEn").innerText = currentCard.en;
+      document.getElementById("cardIndexLabel").innerText = `#${currentCard.index}`;
+      document.getElementById("currentDrawerDisplay").innerText = drawerText;
+
+      // Reset favorite icon status
+      // (favorites feature removed)
+
+      // Ensure card flips to show the content (the back face)
+      const flipper = document.getElementById("cardFlipper");
+      if (!isFlipped) {
+        // Flipping animation
+        flipper.classList.add("rotate-y-180");
+        isFlipped = true;
+      } else {
+        // Double animation to re-flip
+        flipper.classList.remove("rotate-y-180");
+        setTimeout(() => {
+          flipper.classList.add("rotate-y-180");
+        }, 200);
+      }
+
+      // Register into history
+      historyList.unshift({
+        categoryName: currentCard.categoryName,
+        badgeColor: currentCard.badgeColor,
+        zh: currentCard.zh,
+        en: currentCard.en
+      });
+
+      // Advance player turns for the next drawer
+      advancePlayerTurn();
+      
+      // Update displays
+      updateStatistics();
+      renderHistory();
+      playSound('draw');
+    }
+
+    function triggerCardFlip() {
+      const flipper = document.getElementById("cardFlipper");
+      if (isFlipped) {
+        flipper.classList.remove("rotate-y-180");
+        isFlipped = false;
+      } else {
+        flipper.classList.add("rotate-y-180");
+        isFlipped = true;
+      }
+      playSound('flip');
+    }
+
+    // ------------------------------------------------------------------
+    // History Renderer
+    // ------------------------------------------------------------------
+    function renderHistory() {
+      const container = document.getElementById("historyLogList");
+      const countLabel = document.getElementById("historyCount");
+
+      countLabel.innerText = `已抽取 ${historyList.length} 張`;
+
+      if (historyList.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-6">尚無抽取歷史，開始抽取後，卡片將記錄於此。</p>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      historyList.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "p-3 bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 rounded-2xl transition duration-150 flex flex-col gap-1";
+        div.innerHTML = `
+          <div class="flex items-center gap-2 text-xs">
+            <span class="w-2 h-2 rounded-full ${item.badgeColor}"></span>
+            <span class="text-slate-400 font-bold">${item.categoryName}</span>
+          </div>
+          <div class="text-slate-200 text-xs font-semibold">${item.zh}</div>
+          <div class="text-[10px] text-slate-500 font-serif italic">${item.en}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Collapsible YouTube Ambient Panel Controller
+    // ------------------------------------------------------------------
+    let musicWidgetOpen = false;
+
+    function toggleMusicWidget() {
+      const widget = document.getElementById("musicWidgetContainer");
+      musicWidgetOpen = !musicWidgetOpen;
+      
+      if (musicWidgetOpen) {
+        widget.classList.remove("scale-y-0", "h-0");
+        widget.classList.add("scale-y-100", "h-auto", "mt-8");
+        // Scroll to widget smoothly
+        setTimeout(() => {
+          widget.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else {
+        widget.classList.add("scale-y-0", "h-0");
+        widget.classList.remove("scale-y-100", "h-auto", "mt-8");
+      }
+      playSound('flip');
+    }
+  </script>
+
+</body>
+</html>
