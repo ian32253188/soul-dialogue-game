@@ -683,14 +683,18 @@
         drawPools[cat] = [...CARD_DATA[cat].cards];
         // Also re-add custom cards for this category
         customCards.filter(c => c.deck === cat).forEach(c => {
-          drawPools[cat].push({ zh: c.zh, en: c.en, custom: true, id: c.id });
+          drawPools[cat].push({ zh: c.zh, custom: true, id: c.id });
         });
       });
+      
+      // Reset history list
+      historyList = [];
+      renderHistory();
       
       updateStatistics();
       
       if (showAlert) {
-        showCustomModal("重置成功", "已為您將所有卡組重新洗牌。卡池恢復完整狀態（含自訂牌卡）！");
+        showCustomModal("重置成功", "已為您將所有卡組重新洗牌，並清空及重設抽取歷史紀錄！");
         playSound('success');
       }
     }
