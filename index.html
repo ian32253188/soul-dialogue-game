@@ -175,10 +175,6 @@
               <textarea id="customCardZh" rows="2" placeholder="輸入你的問題..." class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:outline-none rounded-xl px-3.5 py-2 text-sm text-slate-200 transition resize-none"></textarea>
             </div>
             <div>
-              <label class="text-xs text-slate-400 mb-1 block">英文翻譯（選填）</label>
-              <input type="text" id="customCardEn" placeholder="English translation (optional)" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:outline-none rounded-xl px-3.5 py-2 text-sm text-slate-200 transition">
-            </div>
-            <div>
               <label class="text-xs text-slate-400 mb-1 block">加入哪個卡組</label>
               <select id="customCardDeck" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:outline-none rounded-xl px-3.5 py-2 text-sm text-slate-200 transition">
                 <option value="warmup">暖身破冰</option>
@@ -497,11 +493,9 @@
 
     function addCustomCard() {
       const zhInput = document.getElementById('customCardZh');
-      const enInput = document.getElementById('customCardEn');
       const deckSelect = document.getElementById('customCardDeck');
 
       const zh = zhInput.value.trim();
-      const en = enInput.value.trim() || '（自訂卡片）';
       const deck = deckSelect.value;
 
       if (!zh) {
@@ -509,15 +503,14 @@
         return;
       }
 
-      const newCard = { zh, en, deck, id: Date.now() };
+      const newCard = { zh, deck, id: Date.now() };
       customCards.push(newCard);
       saveCustomCardsToStorage();
 
       // Also add to the live draw pool immediately
-      drawPools[deck].push({ zh, en, custom: true, id: newCard.id });
+      drawPools[deck].push({ zh, custom: true, id: newCard.id });
 
       zhInput.value = '';
-      enInput.value = '';
 
       updateStatistics();
       renderCustomCardList();
@@ -566,7 +559,6 @@
               <span class="text-amber-400 text-[10px]">✏️ 自訂</span>
             </div>
             <div class="text-slate-200 text-xs font-semibold">${card.zh}</div>
-            <div class="text-[10px] text-slate-500 font-serif italic">${card.en}</div>
           </div>
           <button onclick="deleteCustomCard(${card.id})" class="text-slate-500 hover:text-rose-400 p-1 shrink-0 transition" title="刪除此自訂卡">
             🗑️
@@ -853,7 +845,6 @@
         categoryName: CARD_DATA[selectedCategoryKey].name,
         badgeColor: CARD_DATA[selectedCategoryKey].badgeColor,
         zh: cardObj.zh,
-        en: cardObj.en,
         isCustom: !!cardObj.custom,
         index: (builtInCount + customCount) - currentCategoryPool.length
       };
@@ -868,7 +859,6 @@
       document.getElementById("cardCategoryName").innerText = currentCard.categoryName;
       document.getElementById("cardBadgeColor").className = `w-2.5 h-2.5 rounded-full ${currentCard.badgeColor}`;
       document.getElementById("cardQuestionZh").innerText = currentCard.zh;
-      document.getElementById("cardQuestionEn").innerText = currentCard.en;
       document.getElementById("cardIndexLabel").innerText = `#${currentCard.index}`;
       document.getElementById("currentDrawerDisplay").innerText = drawerText;
 
@@ -893,8 +883,7 @@
       historyList.unshift({
         categoryName: currentCard.categoryName,
         badgeColor: currentCard.badgeColor,
-        zh: currentCard.zh,
-        en: currentCard.en
+        zh: currentCard.zh
       });
 
       // Advance player turns for the next drawer
@@ -942,7 +931,6 @@
             <span class="text-slate-400 font-bold">${item.categoryName}</span>
           </div>
           <div class="text-slate-200 text-xs font-semibold">${item.zh}</div>
-          <div class="text-[10px] text-slate-500 font-serif italic">${item.en}</div>
         `;
         container.appendChild(div);
       });
