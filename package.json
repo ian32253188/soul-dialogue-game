@@ -1,0 +1,9 @@
+{
+  "name": "soul-dialogue-game",
+  "private": true,
+  "version": "1.0.0",
+  "description": "心靈連結之旅｜深度對話牌卡遊戲",
+  "scripts": {
+    "build": "node scripts/build-cards.mjs"
+  }
+}
