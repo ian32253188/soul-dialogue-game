@@ -309,26 +309,23 @@
           </button>
         </div>
 
+        <!-- Drew Card History Log: stays beneath the draw controls on wide screens -->
+        <section class="w-full max-w-lg border-t border-brand-hairline pt-8">
+          <div class="bg-brand-card/30 border border-brand-hairline p-5 rounded-3xl font-sans">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-base font-bold text-brand-ink flex items-center gap-2">
+                📚 抽取歷史
+              </h3>
+              <span id="historyCount" class="text-xs bg-[#ffffff] border border-brand-hairline px-2.5 py-0.5 rounded-full text-brand-muted">已抽取 0 張</span>
+            </div>
+            <div id="historyLogList" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-sm">
+              <p class="text-xs text-brand-muted italic text-center py-6">尚無抽取歷史，開始抽取後，卡片將記錄於此。</p>
+            </div>
+          </div>
+        </section>
+
       </section>
     </main>
-
-    <!-- Bottom Widgets Panel: History logs -->
-    <section class="mt-12 max-w-lg mx-auto border-t border-brand-hairline pt-8">
-      
-      <!-- Drew Card History Log -->
-      <div class="bg-brand-card/30 border border-brand-hairline p-5 rounded-3xl font-sans">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-base font-bold text-brand-ink flex items-center gap-2">
-            📚 抽取歷史
-          </h3>
-          <span id="historyCount" class="text-xs bg-[#ffffff] border border-brand-hairline px-2.5 py-0.5 rounded-full text-brand-muted">已抽取 0 張</span>
-        </div>
-        <div id="historyLogList" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-sm">
-          <p class="text-xs text-brand-muted italic text-center py-6">尚無抽取歷史，開始抽取後，卡片將記錄於此。</p>
-        </div>
-      </div>
-
-    </section>
 
     <!-- Custom Cards Management Section -->
     <section id="customCardsSection" class="mt-8 border-t border-brand-hairline pt-8 hidden font-sans">
