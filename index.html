@@ -53,6 +53,25 @@
     .rotate-y-180 {
       transform: rotateY(180deg);
     }
+
+    /* Keep the main title on one line while preserving the desktop size. */
+    .site-title {
+      font-size: clamp(1.25rem, 7vw, 2.25rem);
+      line-height: 1.1;
+    }
+
+    /*
+     * Keep the card portrait-shaped on phones, then ease its height down
+     * between tablet and desktop widths instead of jumping at the lg break.
+     * The endpoints preserve the tested column alignment: 640px at 768px
+     * wide and 444px from the 1280px desktop layout onward.
+     */
+    @media (min-width: 768px) {
+      .responsive-card-slot {
+        aspect-ratio: auto;
+        height: clamp(444px, calc(1183px - 70.703125vw), 640px);
+      }
+    }
     
     /* Elegant Custom Scrollbar */
     ::-webkit-scrollbar {
@@ -78,8 +97,8 @@
     <!-- Header -->
     <header class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-brand-hairline pb-6 gap-4">
       <div class="text-center md:text-left space-y-1">
-        <h1 class="text-3xl md:text-4xl font-serif font-bold text-brand-ink flex items-center justify-center md:justify-start gap-3">
-          <span>✨ 心靈連結之旅</span>
+        <h1 class="site-title font-serif font-bold text-brand-ink flex items-center justify-center md:justify-start gap-3">
+          <span class="whitespace-nowrap">✨ 心靈連結之旅</span>
           <span class="text-xs px-2.5 py-0.5 rounded-full bg-brand-coral/10 border border-brand-coral/20 text-brand-coral font-medium font-sans">深度對話牌卡</span>
         </h1>
         <p class="text-xs md:text-sm text-brand-muted tracking-wider">從輕鬆破冰到深度共鳴的對話工具</p>
@@ -146,7 +165,7 @@
           </h2>
           <div class="space-y-3 font-sans">
             <div class="flex gap-2">
-              <input type="text" id="playerNameInput" placeholder="輸入玩家名字..." class="flex-grow bg-[#ffffff] border border-brand-hairline focus:border-brand-coral focus:outline-none rounded-xl px-3.5 py-2 text-sm text-brand-ink transition">
+              <input type="text" id="playerNameInput" placeholder="輸入玩家名字..." class="flex-grow min-w-0 bg-[#ffffff] border border-brand-hairline focus:border-brand-coral focus:outline-none rounded-xl px-3.5 py-2 text-sm text-brand-ink transition">
               <button onclick="addPlayer()" class="px-4 py-2 bg-brand-coral hover:bg-brand-coralActive text-white font-bold text-sm rounded-xl transition shadow-sm active:scale-95 shrink-0">
                 新增
               </button>
@@ -239,7 +258,7 @@
       <section class="lg:col-span-8 lg:h-full flex flex-col items-center justify-center lg:justify-start space-y-8">
         
         <!-- The Main 3D Card Slot -->
-        <div class="w-full max-w-lg aspect-[3/4] md:aspect-[4/5] lg:aspect-[15/13] perspective-1000 relative">
+        <div class="w-full max-w-lg aspect-[3/4] responsive-card-slot perspective-1000 relative">
           
           <div id="cardFlipper" class="w-full h-full preserve-3d transition-transform duration-500 cursor-pointer relative" onclick="triggerCardFlip()">
             
@@ -297,7 +316,7 @@
 
               <!-- Question Body -->
               <div class="flex-grow flex flex-col justify-center py-8">
-                <p id="cardQuestionZh" class="text-2xl md:text-3xl font-serif font-bold text-brand-ink leading-relaxed text-center tracking-wide">
+                <p id="cardQuestionZh" class="text-2xl md:text-3xl font-serif font-bold text-brand-ink leading-relaxed text-center tracking-wide break-words">
                   請先點擊下方抽牌鈕開始！
                 </p>
               </div>

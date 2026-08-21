@@ -28,6 +28,8 @@ jobs:
 
       - name: Build site from cards.md
         run: npm run build
+      - name: Check responsive layout rules
+        run: npm run check:rwd
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
