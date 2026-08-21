@@ -12,6 +12,7 @@ const checks = [
   ["narrow player input", /id="playerNameInput"[^>]*\bmin-w-0\b/u],
   ["fluid site title", /\.site-title\s*\{[^}]*font-size:\s*clamp\(/su],
   ["single-line site title", /<h1[^>]*site-title[^>]*>[\s\S]*?<span[^>]*whitespace-nowrap/u],
+  ["single-line title badge", /class="site-badge\b[^>]*"/u],
   ["question text wrapping", /id="cardQuestionZh"[^>]*\bbreak-words\b/u],
   ["scrollable history", /id="historyLogList"[^>]*\boverflow-y-auto\b/u],
 ];
