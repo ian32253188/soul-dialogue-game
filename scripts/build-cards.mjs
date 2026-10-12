@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE_PATH = path.join(ROOT, "cards.md");
 const TEMPLATE_PATH = path.join(ROOT, "index.html");
+const ASSET_DIR = path.join(ROOT, "assets");
 const OUTPUT_DIR = path.join(ROOT, "dist");
 const OUTPUT_PATH = path.join(OUTPUT_DIR, "index.html");
 
@@ -57,7 +58,7 @@ function parseCards(markdown) {
 
     if (!line.trim() || line.trimStart().startsWith("#")) continue;
 
-    const cardMatch = line.match(/^\s*(?:\d+[.)]|[-*])\s+(.+?)\s*$/u);
+    const cardMatch = line.match(/^\s*(?:\d+[.)]|[-*])\s+(?:<!--\s*card-id:\s*([a-z0-9_-]+)\s*-->\s*)?(.+?)\s*$/iu);
     if (!cardMatch) {
       throw new Error(`第 ${lineNumber + 1} 行不是有效的牌卡項目：「${line}」`);
     }
@@ -65,9 +66,14 @@ function parseCards(markdown) {
       throw new Error(`第 ${lineNumber + 1} 行的牌卡沒有放在牌組標題下：「${line}」`);
     }
 
-    const text = cardMatch[1].replace(/\s+/gu, " ").trim();
+    const id = cardMatch[1];
+    if (!id) {
+      throw new Error(`第 ${lineNumber + 1} 行的牌卡缺少固定 ID。請加入「<!-- card-id: ${activeDeck}-new-id -->」。`);
+    }
+
+    const text = cardMatch[2].replace(/\s+/gu, " ").trim();
     if (!text) throw new Error(`第 ${lineNumber + 1} 行的牌卡內容是空白。`);
-    cards[activeDeck].push(text);
+    cards[activeDeck].push({ id, zh: text });
   }
 
   for (const [deck, config] of Object.entries(DECKS)) {
@@ -75,13 +81,18 @@ function parseCards(markdown) {
   }
 
   const seen = new Map();
+  const seenIds = new Map();
   for (const [deck, deckCards] of Object.entries(cards)) {
-    deckCards.forEach((text, index) => {
+    deckCards.forEach((card, index) => {
       const location = `${DECKS[deck].name} #${index + 1}`;
-      if (seen.has(text)) {
-        throw new Error(`發現重複題目：${location} 與 ${seen.get(text)} 都是「${text}」`);
+      if (seenIds.has(card.id)) {
+        throw new Error(`發現重複牌卡 ID：「${card.id}」同時出現在 ${seenIds.get(card.id)} 與 ${location}`);
       }
-      seen.set(text, location);
+      if (seen.has(card.zh)) {
+        throw new Error(`發現重複題目：${location} 與 ${seen.get(card.zh)} 都是「${card.zh}」`);
+      }
+      seenIds.set(card.id, location);
+      seen.set(card.zh, location);
     });
   }
 
@@ -97,7 +108,7 @@ function createCardData(cards) {
         name: config.name,
         badgeColor: config.badgeColor,
         colorClass: config.colorClass,
-        cards: cards[deck].map((zh) => ({ zh })),
+        cards: cards[deck].map(({ id, zh }) => ({ id, title: "", zh, image: "friends" })),
       },
     ]),
   );
@@ -121,6 +132,7 @@ function build() {
   fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, output, "utf8");
+  fs.cpSync(ASSET_DIR, path.join(OUTPUT_DIR, "assets"), { recursive: true });
 
   const counts = Object.entries(cards).map(([deck, deckCards]) => `${DECKS[deck].name} ${deckCards.length} 張`);
   console.log(`已產生 ${path.relative(ROOT, OUTPUT_PATH)}：${counts.join("、")}`);

@@ -39,6 +39,22 @@
   </script>
 
   <style>
+    h2 {
+      font-size: 1.5rem !important;
+      line-height: 1.3 !important;
+    }
+    h3 {
+      font-size: 1.125rem !important;
+      line-height: 1.4 !important;
+    }
+    h3#cardPromptTitle {
+      font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
+    }
+    h4 {
+      font-size: 1rem !important;
+      line-height: 1.4 !important;
+    }
+
     /* 3D Card Flip CSS */
     .perspective-1000 {
       perspective: 1000px;
@@ -52,6 +68,67 @@
     }
     .rotate-y-180 {
       transform: rotateY(180deg);
+    }
+
+    .card-editor-dialog {
+      width: min(100vw, 760px);
+      max-width: none;
+      max-height: none;
+      height: 100dvh;
+      margin: 0 0 0 auto;
+      padding: 0;
+      border: 0;
+      color: #141413;
+      background: transparent;
+      overflow: visible;
+    }
+    .card-editor-dialog::backdrop {
+      background: rgb(20 20 19 / 42%);
+      backdrop-filter: blur(3px);
+    }
+    .card-editor-panel {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 12px;
+      background: #faf9f5;
+      border-inline-start: 1px solid #e6dfd8;
+      border-radius: 24px;
+      box-shadow: -12px 0 40px rgb(20 20 19 / 12%);
+    }
+    .card-editor-scroll {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .editor-card-row[aria-pressed="true"] {
+      border-color: #cc785c;
+      background: #f7e9e1;
+    }
+    .editor-card-row:focus-visible,
+    .editor-control:focus-visible {
+      outline: 3px solid rgb(204 120 92 / 65%);
+      outline-offset: 2px;
+    }
+    .playing-card-art {
+      display: block;
+      width: 100%;
+      height: clamp(92px, 20vw, 158px);
+      object-fit: contain;
+      object-position: center;
+      margin: 0 auto;
+    }
+    .image-preview {
+      width: 112px;
+      height: 82px;
+      object-fit: cover;
+      border: 1px solid #e6dfd8;
+      border-radius: 14px;
+      background: #efe9de;
+    }
+    .status-live {
+      min-height: 1.25rem;
     }
 
     /* Keep the main title on one line while preserving the desktop size. */
@@ -75,6 +152,20 @@
       .responsive-card-slot {
         aspect-ratio: auto;
         height: clamp(444px, calc(1183px - 70.703125vw), 640px);
+      }
+    }
+
+    @media (max-width: 639px) {
+      .card-editor-dialog {
+        width: 100vw;
+      }
+      .card-editor-panel {
+        padding: 0 !important;
+        border-inline-start: 0;
+        border-radius: 0;
+      }
+      .playing-card-art {
+        height: 108px;
       }
     }
     
@@ -106,8 +197,12 @@
           <span class="whitespace-nowrap">✨ 心靈連結之旅</span>
           <span class="site-badge py-0.5 rounded-full bg-brand-coral/10 border border-brand-coral/20 text-brand-coral font-medium font-sans">深度對話牌卡</span>
         </h1>
-        <p class="text-xs md:text-sm text-brand-muted tracking-wider">從輕鬆破冰到深度共鳴的對話工具</p>
+        <p class="text-xs md:text-sm text-brand-muted tracking-wider">好朋友相聚，從真心分享開始。</p>
       </div>
+      <button type="button" onclick="openCardEditor()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-coral/30 bg-white/75 text-brand-coral hover:bg-brand-coral hover:text-white font-semibold text-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-coral">
+        <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+        我的牌卡
+      </button>
     </header>
 
     <!-- Main Container -->
@@ -118,16 +213,16 @@
         
         <!-- Deck Settings Box -->
         <div class="bg-brand-card/40 border border-brand-hairline p-5 rounded-3xl backdrop-blur-md shadow-sm">
-          <h2 class="text-base font-bold text-brand-ink mb-4 flex items-center gap-2">
+          <h2 class="text-xl font-bold text-brand-ink mb-4 flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>
-            1. 選擇要加入的卡組
+            選擇今晚想聊的方向
           </h2>
           <div class="space-y-3 font-sans">
             <!-- Warmup Deck -->
             <label class="flex items-center justify-between p-3 rounded-2xl border border-brand-hairline bg-[#ffffff]/60 hover:bg-[#ffffff] transition-all cursor-pointer select-none">
               <div class="flex items-center gap-3">
                 <input type="checkbox" id="deck_warmup" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-brand-coral focus:ring-brand-coral/50 bg-[#faf9f5] border-brand-hairline">
-                <span class="text-sm font-semibold text-brand-ink">暖身破冰</span>
+                <span class="flex flex-col"><span class="text-sm font-semibold text-brand-ink">暖身破冰</span><span class="text-[11px] text-brand-muted">從日常小事打開話題</span></span>
               </div>
               <span id="count_warmup" class="text-xs font-mono bg-rose-500/10 text-rose-600 px-2.5 py-0.5 rounded-full font-bold">0/10</span>
             </label>
@@ -136,7 +231,7 @@
             <label class="flex items-center justify-between p-3 rounded-2xl border border-brand-hairline bg-[#ffffff]/60 hover:bg-[#ffffff] transition-all cursor-pointer select-none">
               <div class="flex items-center gap-3">
                 <input type="checkbox" id="deck_one_star" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-brand-coral focus:ring-brand-coral/50 bg-[#faf9f5] border-brand-hairline">
-                <span class="text-sm font-semibold text-brand-ink">一星連結 ⭐</span>
+                <span class="flex flex-col"><span class="text-sm font-semibold text-brand-ink">一星連結 ⭐</span><span class="text-[11px] text-brand-muted">分享喜歡的事與生活片段</span></span>
               </div>
               <span id="count_one_star" class="text-xs font-mono bg-teal-500/10 text-teal-600 px-2.5 py-0.5 rounded-full font-bold">0/20</span>
             </label>
@@ -145,7 +240,7 @@
             <label class="flex items-center justify-between p-3 rounded-2xl border border-brand-hairline bg-[#ffffff]/60 hover:bg-[#ffffff] transition-all cursor-pointer select-none">
               <div class="flex items-center gap-3">
                 <input type="checkbox" id="deck_two_star" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-brand-coral focus:ring-brand-coral/50 bg-[#faf9f5] border-brand-hairline">
-                <span class="text-sm font-semibold text-brand-ink">二星連結 ⭐⭐</span>
+                <span class="flex flex-col"><span class="text-sm font-semibold text-brand-ink">二星連結 ⭐⭐</span><span class="text-[11px] text-brand-muted">聊聊選擇、關係與價值觀</span></span>
               </div>
               <span id="count_two_star" class="text-xs font-mono bg-blue-500/10 text-blue-600 px-2.5 py-0.5 rounded-full font-bold">0/20</span>
             </label>
@@ -154,7 +249,7 @@
             <label class="flex items-center justify-between p-3 rounded-2xl border border-brand-hairline bg-[#ffffff]/60 hover:bg-[#ffffff] transition-all cursor-pointer select-none">
               <div class="flex items-center gap-3">
                 <input type="checkbox" id="deck_three_star" checked onchange="handleCategoryChange()" class="w-4.5 h-4.5 rounded text-brand-coral focus:ring-brand-coral/50 bg-[#faf9f5] border-brand-hairline">
-                <span class="text-sm font-semibold text-brand-ink">三星連結 ⭐⭐⭐</span>
+                <span class="flex flex-col"><span class="text-sm font-semibold text-brand-ink">三星連結 ⭐⭐⭐</span><span class="text-[11px] text-brand-muted">留一點時間，慢慢聽彼此</span></span>
               </div>
               <span id="count_three_star" class="text-xs font-mono bg-purple-500/10 text-purple-600 px-2.5 py-0.5 rounded-full font-bold">0/20</span>
             </label>
@@ -164,13 +259,13 @@
 
         <!-- Player Management Box -->
         <div class="bg-brand-card/40 border border-brand-hairline p-5 rounded-3xl backdrop-blur-md shadow-sm space-y-4">
-          <h2 class="text-brand-ink text-base font-bold flex items-center gap-2">
+          <h2 class="text-brand-ink text-xl font-bold flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>
-            2. 參與玩家設定
+            一起分享的人
           </h2>
           <div class="space-y-3 font-sans">
             <div class="flex gap-2">
-              <input type="text" id="playerNameInput" placeholder="輸入玩家名字..." class="flex-grow min-w-0 bg-[#ffffff] border border-brand-hairline focus:border-brand-coral focus:outline-none rounded-xl px-3.5 py-2 text-sm text-brand-ink transition">
+              <input type="text" id="playerNameInput" maxlength="32" placeholder="輸入朋友的名字…" class="flex-grow min-w-0 bg-[#ffffff] border border-brand-hairline focus:border-brand-coral focus:outline-none rounded-xl px-3.5 py-2 text-sm text-brand-ink transition">
               <button onclick="addPlayer()" class="px-4 py-2 bg-brand-coral hover:bg-brand-coralActive text-white font-bold text-sm rounded-xl transition shadow-sm active:scale-95 shrink-0">
                 新增
               </button>
@@ -212,13 +307,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-brand-coral" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17" />
             </svg>
-            重置全部卡組
+            重新洗牌
           </button>
         </div>
 
         <!-- Custom Card Add Box -->
         <div class="bg-brand-card/40 border border-brand-hairline p-5 rounded-3xl backdrop-blur-md shadow-sm space-y-4 font-sans">
-          <h2 class="text-base font-bold text-brand-ink flex items-center gap-2">
+          <h2 class="text-xl font-bold text-brand-ink flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>
             ✏️ 新增自訂牌卡
           </h2>
@@ -247,7 +342,7 @@
         <section id="customCardsSection" class="mt-8 border-t border-brand-hairline pt-8 hidden font-sans">
           <div class="bg-brand-card/30 border border-brand-hairline p-5 rounded-3xl">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="text-base font-bold text-brand-ink flex items-center gap-2">
+              <h3 class="text-lg font-bold text-brand-ink flex items-center gap-2">
                 ✏️ 我的自訂牌卡
               </h3>
               <span id="customCardCount" class="text-xs bg-brand-coral/10 text-brand-coral border border-brand-coral/20 px-2.5 py-0.5 rounded-full font-bold">0 張</span>
@@ -277,27 +372,11 @@
               </div>
 
               <!-- Center Graphic -->
-              <div class="flex-grow flex flex-col items-center justify-center text-center space-y-6">
-                <!-- Sacred Geometry SVG -->
-                <div class="w-28 h-28 relative flex items-center justify-center">
-                  <svg class="w-24 h-24 text-brand-coral/60" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.75">
-                    <!-- Concentric Circles -->
-                    <circle cx="50" cy="50" r="45" stroke-dasharray="1 3" />
-                    <circle cx="50" cy="50" r="35" />
-                    <circle cx="50" cy="50" r="20" />
-                    <!-- Intersecting Sacred Geometry Lines -->
-                    <line x1="50" y1="5" x2="50" y2="95" />
-                    <line x1="5" y1="50" x2="95" y2="50" />
-                    <line x1="18.2" y1="18.2" x2="81.8" y2="81.8" />
-                    <line x1="18.2" y1="81.8" x2="81.8" y2="18.2" />
-                    <!-- Outer delicate polygons -->
-                    <polygon points="50,15 85,50 50,85 15,50" stroke-dasharray="2 2" />
-                    <circle cx="50" cy="50" r="3" fill="currentColor" class="animate-pulse" style="animation-duration: 4s;" />
-                  </svg>
-                </div>
+              <div class="flex-grow flex flex-col items-center justify-center text-center space-y-4">
+                <img src="assets/friends-together.webp" class="w-full max-w-sm h-36 object-contain" alt="四位好友圍坐分享、彼此傾聽的插畫">
                 <div class="space-y-2">
-                  <h3 class="text-xl md:text-2xl font-serif font-semibold text-brand-ink">點擊抽取或翻轉</h3>
-                  <p class="text-xs text-brand-muted max-w-xs mx-auto font-sans leading-relaxed">點擊下方「隨機抽取下一張卡」，接著點選卡片即可翻面閱讀內容。</p>
+              <h3 id="cardPromptTitle" class="text-xl md:text-2xl font-serif font-semibold text-brand-ink">今晚，從一個好問題開始</h3>
+                  <p class="text-xs text-brand-muted max-w-xs mx-auto font-sans leading-relaxed">抽一張牌，慢慢分享近況；每個人都可以選擇跳過不想回答的題目。</p>
                 </div>
               </div>
 
@@ -316,14 +395,21 @@
                   <span id="cardBadgeColor" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
                   <span id="cardCategoryName" class="text-sm font-bold text-brand-muted font-sans">暖身破冰</span>
                 </div>
-                <span id="cardIndexLabel" class="text-xs font-mono bg-brand-card px-2.5 py-1 rounded-full text-brand-muted font-sans">#0</span>
+                <div class="flex items-center gap-2">
+                  <span id="cardIndexLabel" class="text-xs bg-brand-card px-2.5 py-1 rounded-full text-brand-muted font-sans">#0</span>
+                  <button id="editCurrentCardBtn" type="button" onclick="event.stopPropagation(); editCurrentCard()" disabled aria-label="編輯這張牌" title="編輯這張牌" class="p-1.5 rounded-lg text-brand-coral hover:bg-brand-coral/10 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-coral">
+                    <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+                  </button>
+                </div>
               </div>
 
               <!-- Question Body -->
-              <div class="flex-grow flex flex-col justify-center py-8">
-                <p id="cardQuestionZh" class="text-2xl md:text-3xl font-serif font-bold text-brand-ink leading-relaxed text-center tracking-wide break-words">
+              <div class="flex-grow flex flex-col justify-center py-3 min-h-0">
+                <p id="cardTitleDisplay" class="hidden text-sm font-semibold text-brand-coral text-center mb-2"></p>
+                <p id="cardQuestionZh" class="text-xl md:text-2xl font-serif font-bold text-brand-ink leading-relaxed text-center tracking-wide break-words">
                   請先點擊下方抽牌鈕開始！
                 </p>
+                <img id="cardImageDisplay" class="playing-card-art mt-3" src="assets/friends-together.webp" alt="好朋友圍坐分享的插畫">
               </div>
 
               <!-- Card Footer -->
@@ -343,7 +429,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
             </svg>
-            隨機抽取下一張卡
+            抽一張牌
           </button>
         </div>
 
@@ -351,8 +437,8 @@
         <section class="w-full max-w-lg border-t border-brand-hairline pt-8">
           <div class="bg-brand-card/30 border border-brand-hairline p-5 rounded-3xl font-sans flex flex-col lg:h-[24rem]">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="text-base font-bold text-brand-ink flex items-center gap-2">
-                📚 抽取歷史
+              <h3 class="text-lg font-bold text-brand-ink flex items-center gap-2">
+                剛剛聊過的話題
               </h3>
               <span id="historyCount" class="text-xs bg-[#ffffff] border border-brand-hairline px-2.5 py-0.5 rounded-full text-brand-muted">已抽取 0 張</span>
             </div>
@@ -364,6 +450,100 @@
 
       </section>
     </main>
+
+    <dialog id="cardEditorDialog" class="card-editor-dialog" aria-labelledby="cardEditorTitle" oncancel="event.preventDefault(); closeCardEditor()">
+      <div class="card-editor-panel font-sans p-3">
+        <header class="flex items-start justify-between gap-4 border-b border-brand-hairline px-5 py-5 md:px-7">
+          <div class="min-w-0">
+            <h2 id="cardEditorTitle" class="text-xl font-serif font-bold text-brand-ink">我的牌卡</h2>
+            <p class="mt-1 text-xs text-brand-muted">編輯牌名、題目、分類與卡面圖像。</p>
+          </div>
+          <div class="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <button type="button" onclick="exportCardBackup()" class="editor-control rounded-lg border border-brand-hairline bg-white px-3 py-2 text-xs font-semibold text-brand-ink hover:bg-brand-card">匯出備份</button>
+            <button type="button" onclick="document.getElementById('backupFileInput').click()" class="editor-control rounded-lg border border-brand-hairline bg-white px-3 py-2 text-xs font-semibold text-brand-ink hover:bg-brand-card">匯入備份</button>
+            <button type="button" onclick="resetAllCardEdits()" class="editor-control rounded-lg border border-brand-coral/30 bg-white px-3 py-2 text-xs font-semibold text-brand-coral hover:bg-brand-coral/10">全部還原</button>
+            <button type="button" onclick="closeCardEditor()" aria-label="關閉牌卡編輯器" class="editor-control rounded-lg p-2 text-brand-muted hover:bg-brand-card hover:text-brand-ink">
+              <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+            <input id="backupFileInput" type="file" accept=".json,application/json" class="hidden" onchange="importCardBackup(event)">
+          </div>
+        </header>
+
+        <div class="card-editor-scroll flex-1 px-5 py-4 md:px-7">
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <label class="relative min-w-0 flex-1">
+              <span class="sr-only">搜尋牌卡</span>
+              <svg aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16 16 4 4"/></svg>
+              <input id="editorCardSearch" type="search" oninput="renderCardLibrary()" placeholder="搜尋牌名或題目…" class="editor-control w-full rounded-xl border border-brand-hairline bg-white py-2.5 pl-9 pr-3 text-sm text-brand-ink placeholder:text-brand-muted">
+            </label>
+            <label class="sm:w-44">
+              <span class="sr-only">篩選牌組</span>
+              <select id="editorDeckFilter" onchange="renderCardLibrary()" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3 py-2.5 text-sm text-brand-ink">
+                <option value="all">所有牌組</option>
+                <option value="warmup">暖身破冰</option>
+                <option value="one_star">一星連結</option>
+                <option value="two_star">二星連結</option>
+                <option value="three_star">三星連結</option>
+              </select>
+            </label>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-xs text-brand-muted">
+            <span id="editorCardCount">100 張牌卡</span>
+            <span>你的修改只保存在這個瀏覽器</span>
+          </div>
+          <div id="editorCardList" role="listbox" aria-label="牌卡清單" class="mt-2 max-h-52 overflow-y-auto rounded-2xl border border-brand-hairline bg-white/70 p-1"></div>
+
+          <section id="editorForm" aria-labelledby="editorFormTitle" class="mt-5 border-t border-brand-hairline pt-5">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <h3 id="editorFormTitle" class="text-lg font-serif font-bold text-brand-ink">編輯這張牌</h3>
+              <button type="button" onclick="restoreSelectedCard()" class="editor-control rounded-lg px-3 py-2 text-xs font-semibold text-brand-coral hover:bg-brand-coral/10">還原此牌</button>
+            </div>
+            <div class="grid gap-4">
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-brand-ink">牌名</span>
+                <input id="editorCardTitle" type="text" maxlength="60" oninput="markEditorDirty(); renderEditorPreview()" placeholder="為這張牌取個名字" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base text-brand-ink placeholder:text-brand-muted">
+              </label>
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-brand-ink">牌卡文字</span>
+                <textarea id="editorCardText" rows="3" maxlength="500" oninput="markEditorDirty(); renderEditorPreview()" placeholder="寫下想和朋友分享的問題…" class="editor-control w-full resize-y rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base leading-relaxed text-brand-ink placeholder:text-brand-muted"></textarea>
+              </label>
+              <label class="block sm:max-w-sm">
+                <span class="mb-1.5 block text-xs font-semibold text-brand-ink">所屬分類</span>
+                <select id="editorCardDeck" onchange="markEditorDirty(); renderEditorPreview()" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base text-brand-ink">
+                  <option value="warmup">暖身破冰</option>
+                  <option value="one_star">一星連結</option>
+                  <option value="two_star">二星連結</option>
+                  <option value="three_star">三星連結</option>
+                </select>
+              </label>
+              <div>
+                <span class="mb-2 block text-xs font-semibold text-brand-ink">卡面圖像</span>
+                <div class="flex flex-wrap items-center gap-3">
+                  <img id="editorImagePreview" class="image-preview" src="assets/friends-together.webp" alt="目前牌卡插畫預覽">
+                  <div id="editorImageEmptyState" class="image-preview hidden items-center justify-center px-3 text-center text-xs text-brand-muted">這張牌不使用圖像</div>
+                  <div class="flex flex-col items-start gap-2">
+                    <button type="button" onclick="document.getElementById('editorImageFile').click()" class="editor-control rounded-lg border border-brand-hairline bg-white px-3 py-2 text-sm font-semibold text-brand-ink hover:bg-brand-card">從裝置選圖</button>
+                    <button type="button" onclick="useDefaultCardImage()" class="editor-control text-xs font-medium text-brand-muted underline underline-offset-4 hover:text-brand-coral">使用好友相聚插畫</button>
+                    <button type="button" onclick="clearCardImage()" class="editor-control text-xs font-medium text-brand-muted underline underline-offset-4 hover:text-brand-coral">不使用圖像</button>
+                    <input id="editorImageFile" type="file" accept="image/*" class="hidden" onchange="previewCardImage(event)">
+                  </div>
+                </div>
+                <p class="mt-2 text-xs text-brand-muted">支援常見圖片格式，單張上限 8 MB；圖片留在這個瀏覽器。</p>
+              </div>
+            </div>
+            <div id="editorPreview" class="mt-4 rounded-2xl border border-brand-hairline bg-white/70 p-4">
+              <p class="text-[11px] font-semibold text-brand-muted">牌面預覽</p>
+              <p id="editorPreviewTitle" class="mt-2 hidden text-sm font-semibold text-brand-coral"></p>
+              <p id="editorPreviewText" class="mt-1 break-words font-serif text-lg font-semibold leading-relaxed text-brand-ink"></p>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <p id="editorSaveStatus" role="status" aria-live="polite" class="status-live text-xs text-brand-muted"></p>
+              <button type="button" onclick="saveCardEdits()" class="editor-control rounded-xl bg-brand-coral px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-brand-coralActive disabled:cursor-not-allowed disabled:opacity-50">儲存修改</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </dialog>
 
     <!-- Custom Modal/Dialog replacement for Alert -->
     <div id="customModal" class="fixed inset-0 bg-[#141413]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-200 opacity-0 pointer-events-none font-sans">
@@ -520,7 +700,21 @@
 
     // Custom Cards (persisted in localStorage)
     const CUSTOM_CARDS_KEY = 'soul_dialogue_custom_cards';
+    const CARD_OVERRIDES_KEY = 'soul_dialogue_card_overrides_v1';
+    const CARD_IMAGE_DB_NAME = 'soul_dialogue_card_images';
+    const CARD_IMAGE_STORE = 'images';
+    const CARD_BACKUP_FORMAT = 'soul-dialogue-game-backup';
+    const CARD_IMAGE_DEFAULT = 'friends';
+    const CARD_DECK_ORDER = ['warmup', 'one_star', 'two_star', 'three_star'];
     let customCards = [];
+    let cardOverrides = {};
+    let selectedEditorCardKey = null;
+    let editorDirty = false;
+    let editorDraftImageRef = CARD_IMAGE_DEFAULT;
+    let pendingImageBlob = null;
+    let pendingImageObjectUrl = null;
+    let imageDatabasePromise = null;
+    const imageObjectUrls = new Map();
 
     // Synthesized Audio Context (Web Audio API)
     let audioCtx = null;
@@ -529,9 +723,8 @@
     // Event Listeners & Bootstrapping
     // ------------------------------------------------------------------
     window.onload = function() {
-      // Load custom cards from localStorage
       loadCustomCardsFromStorage();
-      // Setup initial draw pools
+      loadCardOverridesFromStorage();
       resetDecks(false);
       updateStatistics();
       renderCustomCardList();
@@ -543,14 +736,203 @@
     function loadCustomCardsFromStorage() {
       try {
         const stored = localStorage.getItem(CUSTOM_CARDS_KEY);
-        customCards = stored ? JSON.parse(stored) : [];
+        const parsed = stored ? JSON.parse(stored) : [];
+        if (!Array.isArray(parsed)) throw new Error('自訂牌卡資料格式錯誤。');
+        const ids = new Set();
+        let needsSave = false;
+        customCards = parsed.filter(card => card && typeof card.zh === 'string' && card.zh.trim() && CARD_DECK_ORDER.includes(card.deck)).map(card => {
+          let id = typeof card.id === 'string' ? card.id : '';
+          if (!id || ids.has(id)) {
+            id = `custom-${createLocalId()}`;
+            needsSave = true;
+          }
+          ids.add(id);
+          const title = typeof card.title === 'string' ? card.title.slice(0, 60) : '';
+          const image = typeof card.image === 'string' ? card.image : CARD_IMAGE_DEFAULT;
+          if (card.title !== title || card.image !== image || card.zh !== card.zh.trim()) needsSave = true;
+          return { ...card, id, zh: card.zh.trim(), title, image };
+        });
+        if (parsed.length !== customCards.length) needsSave = true;
+        if (needsSave) saveCustomCardsToStorage();
       } catch(e) {
         customCards = [];
       }
     }
 
-    function saveCustomCardsToStorage() {
-      localStorage.setItem(CUSTOM_CARDS_KEY, JSON.stringify(customCards));
+    function saveCustomCardsToStorage(cards = customCards) {
+      try {
+        localStorage.setItem(CUSTOM_CARDS_KEY, JSON.stringify(cards));
+        customCards = cards;
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function loadCardOverridesFromStorage() {
+      try {
+        const stored = localStorage.getItem(CARD_OVERRIDES_KEY);
+        const parsed = stored ? JSON.parse(stored) : {};
+        cardOverrides = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch (error) {
+        cardOverrides = {};
+      }
+    }
+
+    function saveCardOverridesToStorage(nextOverrides) {
+      try {
+        localStorage.setItem(CARD_OVERRIDES_KEY, JSON.stringify(nextOverrides));
+        cardOverrides = nextOverrides;
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function createLocalId() {
+      return (window.crypto && typeof window.crypto.randomUUID === 'function')
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function openCardImageDatabase() {
+      if (imageDatabasePromise) return imageDatabasePromise;
+      imageDatabasePromise = new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+          reject(new Error('這個瀏覽器不支援本機圖片儲存。'));
+          return;
+        }
+        const request = indexedDB.open(CARD_IMAGE_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          if (!request.result.objectStoreNames.contains(CARD_IMAGE_STORE)) {
+            request.result.createObjectStore(CARD_IMAGE_STORE);
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('無法開啟本機圖片儲存。'));
+      });
+      return imageDatabasePromise;
+    }
+
+    async function putCardImage(imageId, blob) {
+      const db = await openCardImageDatabase();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CARD_IMAGE_STORE, 'readwrite');
+        transaction.objectStore(CARD_IMAGE_STORE).put(blob, imageId);
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error || new Error('圖片未能儲存。'));
+        transaction.onabort = () => reject(transaction.error || new Error('圖片儲存已取消。'));
+      });
+    }
+
+    async function getCardImage(imageId) {
+      const db = await openCardImageDatabase();
+      return new Promise((resolve, reject) => {
+        const request = db.transaction(CARD_IMAGE_STORE, 'readonly').objectStore(CARD_IMAGE_STORE).get(imageId);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error('無法讀取本機圖片。'));
+      });
+    }
+
+    async function deleteCardImage(imageId) {
+      if (!imageDatabasePromise && !('indexedDB' in window)) return;
+      try {
+        const db = await openCardImageDatabase();
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(CARD_IMAGE_STORE, 'readwrite');
+          transaction.objectStore(CARD_IMAGE_STORE).delete(imageId);
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error);
+        });
+      } catch (error) {
+        console.warn('無法清除已不使用的牌卡圖片。', error);
+      }
+      const url = imageObjectUrls.get(imageId);
+      if (url) URL.revokeObjectURL(url);
+      imageObjectUrls.delete(imageId);
+    }
+
+    function effectiveCard(card, originalDeck, isCustom = false) {
+      const key = isCustom ? `custom:${card.id}` : card.id;
+      const override = cardOverrides[key] || {};
+      const deck = CARD_DECK_ORDER.includes(override.deck) ? override.deck : originalDeck;
+      return {
+        ...card,
+        key,
+        custom: isCustom,
+        title: typeof override.title === 'string' ? override.title : (card.title || ''),
+        zh: typeof override.zh === 'string' ? override.zh : card.zh,
+        image: typeof override.image === 'string' ? override.image : (card.image || CARD_IMAGE_DEFAULT),
+        deck,
+        categoryName: CARD_DATA[deck].name,
+        badgeColor: CARD_DATA[deck].badgeColor
+      };
+    }
+
+    function getAllEffectiveCards() {
+      const cards = [];
+      Object.entries(CARD_DATA).forEach(([deck, deckData]) => {
+        deckData.cards.forEach(card => cards.push(effectiveCard(card, deck)));
+      });
+      customCards.forEach(card => {
+        if (CARD_DECK_ORDER.includes(card.deck) && typeof card.zh === 'string') {
+          cards.push(effectiveCard(card, card.deck, true));
+        }
+      });
+      return cards.sort((a, b) => CARD_DECK_ORDER.indexOf(a.deck) - CARD_DECK_ORDER.indexOf(b.deck));
+    }
+
+    function rebuildDrawPools(resetHistory = false) {
+      if (resetHistory) historyList = [];
+      const alreadyDrawn = new Set(historyList.map(item => item.key).filter(Boolean));
+      drawPools = { warmup: [], one_star: [], two_star: [], three_star: [] };
+      getAllEffectiveCards().forEach(card => {
+        if (!alreadyDrawn.has(card.key)) drawPools[card.deck].push(card);
+      });
+      renderHistory();
+      updateStatistics();
+    }
+
+    function displayCardTitle(card) {
+      return card.title || card.zh.slice(0, 18) + (card.zh.length > 18 ? '…' : '');
+    }
+
+    async function imageSourceForCard(imageRef) {
+      if (!imageRef || imageRef === 'friends') return 'assets/friends-together.webp';
+      if (imageRef === 'none') return '';
+      if (!imageRef.startsWith('uploaded:')) return 'assets/friends-together.webp';
+      const imageId = imageRef.slice('uploaded:'.length);
+      if (imageObjectUrls.has(imageId)) return imageObjectUrls.get(imageId);
+      const blob = await getCardImage(imageId);
+      if (!blob) return 'assets/friends-together.webp';
+      const url = URL.createObjectURL(blob);
+      imageObjectUrls.set(imageId, url);
+      return url;
+    }
+
+    async function updateCurrentCardView() {
+      if (!currentCard) return;
+      const card = currentCard;
+      document.getElementById('cardCategoryName').innerText = card.categoryName;
+      document.getElementById('cardBadgeColor').className = `w-2.5 h-2.5 rounded-full ${card.badgeColor}`;
+      document.getElementById('cardTitleDisplay').innerText = card.title || '';
+      document.getElementById('cardTitleDisplay').classList.toggle('hidden', !card.title);
+      document.getElementById('cardQuestionZh').innerText = card.zh;
+      document.getElementById('cardIndexLabel').innerText = `#${card.index}`;
+      document.getElementById('editCurrentCardBtn').disabled = false;
+      document.getElementById('currentDrawerDisplay').innerText = card.drawerText || '抽卡人：自由討論';
+      const image = document.getElementById('cardImageDisplay');
+      try {
+        const src = await imageSourceForCard(card.image);
+        if (currentCard === card) {
+          image.src = src || 'assets/friends-together.webp';
+          image.alt = src ? `「${displayCardTitle(card)}」的卡面圖像` : '';
+          image.classList.toggle('invisible', !src);
+        }
+      } catch (error) {
+        image.src = 'assets/friends-together.webp';
+        image.alt = '好朋友圍坐分享的插畫';
+      }
     }
 
     function addCustomCard() {
@@ -565,33 +947,47 @@
         return;
       }
 
-      const newCard = { zh, deck, id: Date.now() };
+      const newCard = { zh, deck, title: '', image: CARD_IMAGE_DEFAULT, id: `custom-${createLocalId()}` };
       customCards.push(newCard);
-      saveCustomCardsToStorage();
-
-      // Also add to the live draw pool immediately
-      drawPools[deck].push({ zh, custom: true, id: newCard.id });
+      if (!saveCustomCardsToStorage()) {
+        customCards.pop();
+        showCustomModal('無法新增牌卡', '瀏覽器儲存空間不足。請先匯出備份或清理不需要的牌卡圖片，再試一次。');
+        return;
+      }
 
       zhInput.value = '';
-
-      updateStatistics();
+      rebuildDrawPools(false);
       renderCustomCardList();
       playSound('success');
       showCustomModal('新增成功！', `「${zh.slice(0,20)}${zh.length>20?'…':''}」已加入「${CARD_DATA[deck].name}」牌組，並儲存在此瀏覽器中。`);
     }
 
-    function deleteCustomCard(id) {
-      const card = customCards.find(c => c.id === id);
-      customCards = customCards.filter(c => c.id !== id);
-      saveCustomCardsToStorage();
-
-      // Remove from live draw pool if still there
-      if (card) {
-        drawPools[card.deck] = drawPools[card.deck].filter(c => c.id !== id);
+    async function deleteCustomCard(id) {
+      if (!window.confirm('要刪除這張自訂牌卡嗎？')) return;
+      const nextCustomCards = customCards.filter(c => c.id !== id);
+      const key = `custom:${id}`;
+      const oldImageRefs = uploadedImageRefs(cardOverrides);
+      const nextOverrides = { ...cardOverrides };
+      delete nextOverrides[key];
+      try {
+        localStorage.setItem(CUSTOM_CARDS_KEY, JSON.stringify(nextCustomCards));
+        localStorage.setItem(CARD_OVERRIDES_KEY, JSON.stringify(nextOverrides));
+        customCards = nextCustomCards;
+        cardOverrides = nextOverrides;
+      } catch (error) {
+        try {
+          localStorage.setItem(CUSTOM_CARDS_KEY, JSON.stringify(customCards));
+          localStorage.setItem(CARD_OVERRIDES_KEY, JSON.stringify(cardOverrides));
+        } catch (restoreError) {
+          console.error('無法復原自訂牌卡資料。', restoreError);
+        }
+        showCustomModal('刪除失敗', '瀏覽器無法更新儲存資料，請先匯出備份後再試一次。');
+        return;
       }
-
-      updateStatistics();
+      await deleteImagesNoLongerUsed(oldImageRefs);
+      rebuildDrawPools(false);
       renderCustomCardList();
+      renderCardLibrary();
       playSound('flip');
     }
 
@@ -610,24 +1006,564 @@
       container.innerHTML = '';
 
       customCards.forEach(card => {
-        const deckInfo = CARD_DATA[card.deck];
-        const div = document.createElement('div');
-        div.className = 'p-3 bg-[#ffffff]/60 border border-brand-hairline hover:border-brand-coral/30 rounded-2xl transition duration-150 flex justify-between items-start gap-2';
-        div.innerHTML = `
-          <div class="flex flex-col gap-1 flex-grow">
-            <div class="flex items-center gap-2 text-xs">
-              <span class="w-2 h-2 rounded-full ${deckInfo.badgeColor}"></span>
-              <span class="text-brand-muted font-bold">${deckInfo.name}</span>
-              <span class="text-brand-coral text-[10px]">✏️ 自訂</span>
-            </div>
-            <div class="text-brand-ink text-xs font-semibold">${card.zh}</div>
-          </div>
-          <button onclick="deleteCustomCard(${card.id})" class="text-brand-muted hover:text-rose-500 p-1 shrink-0 transition" title="刪除此自訂卡">
-            🗑️
-          </button>
-        `;
-        container.appendChild(div);
+        const effective = effectiveCard(card, card.deck, true);
+        const row = document.createElement('div');
+        row.className = 'p-3 bg-white/70 border border-brand-hairline hover:border-brand-coral/30 rounded-2xl transition flex items-start justify-between gap-3';
+        const content = document.createElement('div');
+        content.className = 'min-w-0 flex-1';
+        const category = document.createElement('p');
+        category.className = 'text-xs font-semibold text-brand-muted';
+        category.textContent = `${effective.categoryName} · 自訂`;
+        const question = document.createElement('p');
+        question.className = 'mt-1 break-words text-xs font-medium text-brand-ink';
+        question.textContent = effective.title || effective.zh;
+        content.append(category, question);
+        const actions = document.createElement('div');
+        actions.className = 'flex shrink-0 gap-1';
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'rounded-lg p-2 text-brand-coral hover:bg-brand-coral/10';
+        editButton.setAttribute('aria-label', '編輯這張自訂牌卡');
+        editButton.title = '編輯';
+        editButton.innerHTML = '<svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+        editButton.addEventListener('click', () => openCardEditor(effective.key));
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'rounded-lg px-2 py-1 text-xs text-brand-muted hover:bg-rose-50 hover:text-rose-700';
+        deleteButton.setAttribute('aria-label', '刪除此自訂牌卡');
+        deleteButton.textContent = '刪除';
+        deleteButton.addEventListener('click', () => deleteCustomCard(card.id));
+        actions.append(editButton, deleteButton);
+        row.append(content, actions);
+        container.appendChild(row);
       });
+    }
+
+    function deckName(deck) {
+      return CARD_DATA[deck]?.name || '未分類';
+    }
+
+    function findEffectiveCard(key) {
+      return getAllEffectiveCards().find(card => card.key === key) || null;
+    }
+
+    function openCardEditor(cardKey = null) {
+      const dialog = document.getElementById('cardEditorDialog');
+      if (!dialog.open) dialog.showModal();
+      selectedEditorCardKey = cardKey || currentCard?.key || getAllEffectiveCards()[0]?.key || null;
+      editorDirty = false;
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      renderCardLibrary();
+      populateCardEditor();
+      document.getElementById('editorCardSearch').focus();
+    }
+
+    function editCurrentCard() {
+      if (currentCard) openCardEditor(currentCard.key);
+    }
+
+    function closeCardEditor() {
+      if (editorDirty && !window.confirm('這張牌還有未儲存的修改，要放棄嗎？')) return;
+      editorDirty = false;
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      document.getElementById('cardEditorDialog').close();
+    }
+
+    function releasePendingImagePreview() {
+      if (pendingImageObjectUrl) URL.revokeObjectURL(pendingImageObjectUrl);
+      pendingImageObjectUrl = null;
+    }
+
+    function renderCardLibrary() {
+      const container = document.getElementById('editorCardList');
+      if (!container) return;
+      const query = (document.getElementById('editorCardSearch')?.value || '').trim().toLocaleLowerCase();
+      const filterDeck = document.getElementById('editorDeckFilter')?.value || 'all';
+      const allCards = getAllEffectiveCards();
+      const filtered = allCards.filter(card => {
+        const matchesDeck = filterDeck === 'all' || card.deck === filterDeck;
+        const haystack = `${card.title} ${card.zh} ${card.categoryName}`.toLocaleLowerCase();
+        return matchesDeck && (!query || haystack.includes(query));
+      });
+      document.getElementById('editorCardCount').textContent = filterDeck === 'all'
+        ? `${allCards.length} 張牌卡`
+        : `${filtered.length} 張牌卡`;
+      container.replaceChildren();
+      if (filtered.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'px-4 py-7 text-center text-sm text-brand-muted';
+        empty.textContent = '找不到符合條件的牌卡。試試其他關鍵字或牌組。';
+        container.appendChild(empty);
+        return;
+      }
+      filtered.forEach(card => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.role = 'option';
+        row.className = 'editor-card-row flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition hover:bg-brand-card/60';
+        row.setAttribute('aria-pressed', String(card.key === selectedEditorCardKey));
+        row.setAttribute('aria-label', `編輯「${displayCardTitle(card)}」，${card.categoryName}`);
+        const copy = document.createElement('span');
+        copy.className = 'min-w-0 flex-1';
+        const title = document.createElement('span');
+        title.className = 'block truncate text-sm font-semibold text-brand-ink';
+        title.textContent = displayCardTitle(card);
+        const question = document.createElement('span');
+        question.className = 'mt-1 block truncate text-xs text-brand-muted';
+        question.textContent = card.zh;
+        copy.append(title, question);
+        const meta = document.createElement('span');
+        meta.className = 'shrink-0 rounded-full bg-brand-card px-2 py-1 text-[11px] font-semibold text-brand-muted';
+        meta.textContent = card.categoryName;
+        row.append(copy, meta);
+        row.addEventListener('click', () => selectEditorCard(card.key));
+        container.appendChild(row);
+      });
+    }
+
+    function selectEditorCard(key) {
+      if (key === selectedEditorCardKey) return;
+      if (editorDirty && !window.confirm('目前牌卡還有未儲存的修改，要放棄並切換嗎？')) return;
+      editorDirty = false;
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      selectedEditorCardKey = key;
+      renderCardLibrary();
+      populateCardEditor();
+    }
+
+    function selectedEditorCard() {
+      return selectedEditorCardKey ? findEffectiveCard(selectedEditorCardKey) : null;
+    }
+
+    function populateCardEditor() {
+      const card = selectedEditorCard();
+      const form = document.getElementById('editorForm');
+      form.classList.toggle('hidden', !card);
+      if (!card) return;
+      document.getElementById('editorCardTitle').value = card.title || '';
+      document.getElementById('editorCardText').value = card.zh || '';
+      document.getElementById('editorCardDeck').value = card.deck;
+      editorDraftImageRef = card.image || CARD_IMAGE_DEFAULT;
+      document.getElementById('editorSaveStatus').textContent = '';
+      renderEditorPreview();
+      renderEditorImagePreview();
+    }
+
+    function markEditorDirty() {
+      editorDirty = true;
+      document.getElementById('editorSaveStatus').textContent = '有尚未儲存的修改';
+      document.getElementById('editorSaveStatus').className = 'status-live text-xs text-brand-coral';
+    }
+
+    function renderEditorPreview() {
+      const title = document.getElementById('editorCardTitle').value.trim();
+      const text = document.getElementById('editorCardText').value.trim();
+      const titleElement = document.getElementById('editorPreviewTitle');
+      titleElement.textContent = title;
+      titleElement.classList.toggle('hidden', !title);
+      document.getElementById('editorPreviewText').textContent = text || '牌卡文字預覽會顯示在這裡。';
+    }
+
+    async function renderEditorImagePreview() {
+      const preview = document.getElementById('editorImagePreview');
+      if (pendingImageObjectUrl) {
+        preview.src = pendingImageObjectUrl;
+        return;
+      }
+      const ref = editorDraftImageRef;
+      try {
+        const src = await imageSourceForCard(ref);
+        if (editorDraftImageRef === ref && !pendingImageObjectUrl) {
+          const hasImage = !!src;
+          preview.classList.toggle('hidden', !hasImage);
+          document.getElementById('editorImageEmptyState').classList.toggle('hidden', hasImage);
+          document.getElementById('editorImageEmptyState').classList.toggle('flex', !hasImage);
+          if (hasImage) {
+            preview.src = src;
+            preview.alt = '目前牌卡圖像預覽';
+          }
+        }
+      } catch (error) {
+        preview.src = 'assets/friends-together.webp';
+        preview.classList.remove('hidden');
+        document.getElementById('editorImageEmptyState').classList.add('hidden');
+        preview.alt = '預設好友相聚插畫';
+      }
+    }
+
+    async function optimizeUploadedImage(file) {
+      if (!file.type.startsWith('image/')) throw new Error('請選擇圖片檔案。');
+      if (file.size > 8 * 1024 * 1024) throw new Error('圖片超過 8 MB，請先縮小後再上傳。');
+      if (!window.createImageBitmap) return file;
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext('2d');
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close?.();
+      const optimized = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.84));
+      return optimized || file;
+    }
+
+    async function previewCardImage(event) {
+      const input = event.target;
+      const file = input.files?.[0];
+      input.value = '';
+      if (!file) return;
+      try {
+        pendingImageBlob = await optimizeUploadedImage(file);
+        releasePendingImagePreview();
+        pendingImageObjectUrl = URL.createObjectURL(pendingImageBlob);
+        editorDraftImageRef = 'pending-upload';
+        document.getElementById('editorImagePreview').src = pendingImageObjectUrl;
+        document.getElementById('editorImagePreview').alt = '新選擇的牌卡圖像預覽';
+        document.getElementById('editorImagePreview').classList.remove('hidden');
+        document.getElementById('editorImageEmptyState').classList.add('hidden');
+        markEditorDirty();
+      } catch (error) {
+        showCustomModal('無法使用這張圖片', error.message || '請改選其他圖片。');
+      }
+    }
+
+    function useDefaultCardImage() {
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      editorDraftImageRef = CARD_IMAGE_DEFAULT;
+      markEditorDirty();
+      renderEditorImagePreview();
+    }
+
+    function clearCardImage() {
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      editorDraftImageRef = 'none';
+      markEditorDirty();
+      renderEditorImagePreview();
+    }
+
+    function uploadedImageRefs(overrides) {
+      return [...new Set(Object.values(overrides || {})
+        .map(value => value && value.image)
+        .filter(image => typeof image === 'string' && image.startsWith('uploaded:'))
+        .map(image => image.slice('uploaded:'.length)))];
+    }
+
+    async function deleteImagesNoLongerUsed(previousRefs) {
+      const stillUsed = new Set(uploadedImageRefs(cardOverrides));
+      for (const imageId of previousRefs) {
+        if (!stillUsed.has(imageId)) await deleteCardImage(imageId);
+      }
+    }
+
+    function syncHistoryWithEffectiveCards() {
+      historyList = historyList.map(item => {
+        if (!item.key) return item;
+        const updated = findEffectiveCard(item.key);
+        return updated ? { ...item, categoryName: updated.categoryName, badgeColor: updated.badgeColor, title: updated.title, zh: updated.zh } : item;
+      });
+    }
+
+    function refreshCardViewsAfterEdit(cardKey) {
+      syncHistoryWithEffectiveCards();
+      if (currentCard?.key === cardKey) {
+        const updated = findEffectiveCard(cardKey);
+        if (updated) currentCard = { ...updated, index: currentCard.index, drawerText: currentCard.drawerText };
+        updateCurrentCardView();
+      }
+      rebuildDrawPools(false);
+      renderCustomCardList();
+      renderCardLibrary();
+    }
+
+    async function saveCardEdits() {
+      const card = selectedEditorCard();
+      if (!card) return;
+      const title = document.getElementById('editorCardTitle').value.trim();
+      const zh = document.getElementById('editorCardText').value.trim();
+      const deck = document.getElementById('editorCardDeck').value;
+      if (!zh) {
+        document.getElementById('editorSaveStatus').textContent = '請先輸入牌卡文字。';
+        document.getElementById('editorSaveStatus').className = 'status-live text-xs text-rose-700';
+        document.getElementById('editorCardText').focus();
+        return;
+      }
+      if (title.length > 60 || zh.length > 500 || !CARD_DECK_ORDER.includes(deck)) return;
+      const oldImageRefs = uploadedImageRefs(cardOverrides);
+      let image = editorDraftImageRef || CARD_IMAGE_DEFAULT;
+      let newImageId = null;
+      try {
+        if (pendingImageBlob) {
+          newImageId = createLocalId();
+          await putCardImage(newImageId, pendingImageBlob);
+          image = `uploaded:${newImageId}`;
+        }
+        const nextOverrides = {
+          ...cardOverrides,
+          [card.key]: { title, zh, deck, image }
+        };
+        if (!saveCardOverridesToStorage(nextOverrides)) throw new Error('瀏覽器儲存空間不足，請先匯出備份或移除大型圖片。');
+        pendingImageBlob = null;
+        editorDraftImageRef = image;
+        releasePendingImagePreview();
+        editorDirty = false;
+        refreshCardViewsAfterEdit(card.key);
+        document.getElementById('editorSaveStatus').textContent = '已儲存到這個瀏覽器';
+        document.getElementById('editorSaveStatus').className = 'status-live text-xs text-emerald-700';
+        populateCardEditor();
+        document.getElementById('editorSaveStatus').textContent = '已儲存到這個瀏覽器';
+        document.getElementById('editorSaveStatus').className = 'status-live text-xs text-emerald-700';
+        await deleteImagesNoLongerUsed(oldImageRefs);
+        playSound('success');
+      } catch (error) {
+        if (newImageId && !cardOverrides[card.key]?.image?.endsWith(newImageId)) await deleteCardImage(newImageId);
+        document.getElementById('editorSaveStatus').textContent = error.message || '儲存失敗，請再試一次。';
+        document.getElementById('editorSaveStatus').className = 'status-live text-xs text-rose-700';
+      }
+    }
+
+    async function restoreSelectedCard() {
+      const card = selectedEditorCard();
+      if (!card) return;
+      if (!cardOverrides[card.key]) {
+        showCustomModal('這張牌已是原始版本', '目前沒有需要還原的個人修改。');
+        return;
+      }
+      if (!window.confirm(`要還原「${displayCardTitle(card)}」嗎？這張牌的本機修改會被移除。`)) return;
+      const oldImageRefs = uploadedImageRefs(cardOverrides);
+      const nextOverrides = { ...cardOverrides };
+      delete nextOverrides[card.key];
+      if (!saveCardOverridesToStorage(nextOverrides)) {
+        showCustomModal('還原失敗', '瀏覽器無法更新儲存資料，請先匯出備份後再試一次。');
+        return;
+      }
+      editorDirty = false;
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      refreshCardViewsAfterEdit(card.key);
+      populateCardEditor();
+      await deleteImagesNoLongerUsed(oldImageRefs);
+      document.getElementById('editorSaveStatus').textContent = '已還原原卡';
+    }
+
+    async function resetAllCardEdits() {
+      const count = Object.keys(cardOverrides).length;
+      if (!count) {
+        showCustomModal('牌卡已是原始版本', '目前沒有個人修改需要還原。');
+        return;
+      }
+      const unsavedNote = editorDirty ? '目前表單中尚未儲存的修改也會放棄。' : '';
+      if (!window.confirm(`要還原全部 ${count} 張已修改的牌卡嗎？新增的自訂牌卡會保留。${unsavedNote}`)) return;
+      const oldImageRefs = uploadedImageRefs(cardOverrides);
+      if (!saveCardOverridesToStorage({})) {
+        showCustomModal('還原失敗', '瀏覽器無法更新儲存資料，請先匯出備份後再試一次。');
+        return;
+      }
+      editorDirty = false;
+      pendingImageBlob = null;
+      releasePendingImagePreview();
+      syncHistoryWithEffectiveCards();
+      rebuildDrawPools(false);
+      if (currentCard) {
+        const updated = findEffectiveCard(currentCard.key);
+        if (updated) currentCard = { ...updated, index: currentCard.index, drawerText: currentCard.drawerText };
+        updateCurrentCardView();
+      }
+      renderCustomCardList();
+      renderCardLibrary();
+      populateCardEditor();
+      await deleteImagesNoLongerUsed(oldImageRefs);
+      showCustomModal('牌卡已全部還原', '所有內建牌卡已恢復原始內容；新增的自訂牌卡仍保留。');
+    }
+
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('備份圖片讀取失敗。'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function dataUrlToBlob(dataUrl) {
+      const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)$/iu.exec(dataUrl);
+      if (!match) throw new Error('備份中的圖片格式無效。');
+      const binary = atob(match[2]);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+      return new Blob([bytes], { type: match[1] });
+    }
+
+    async function exportCardBackup() {
+      if (editorDirty) {
+        showCustomModal('先儲存牌卡修改', '目前表單還有未儲存的內容。儲存後再匯出，備份才會包含這些修改。');
+        return;
+      }
+      try {
+        const images = {};
+        for (const imageId of uploadedImageRefs(cardOverrides)) {
+          const blob = await getCardImage(imageId);
+          if (!blob) throw new Error('有一張牌卡的本機圖片遺失，請重新選圖後再匯出。');
+          images[imageId] = await blobToDataUrl(blob);
+        }
+        const backup = {
+          format: CARD_BACKUP_FORMAT,
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          customCards,
+          cardOverrides,
+          images
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `soul-dialogue-cards-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        document.getElementById('editorSaveStatus').textContent = '備份已下載到你的裝置';
+        document.getElementById('editorSaveStatus').className = 'status-live text-xs text-emerald-700';
+      } catch (error) {
+        showCustomModal('匯出失敗', error.message || '無法建立備份，請確認瀏覽器允許下載檔案。');
+      }
+    }
+
+    function validateBackup(backup) {
+      if (!backup || backup.format !== CARD_BACKUP_FORMAT || backup.version !== 1) {
+        throw new Error('這不是支援的牌卡備份檔。');
+      }
+      if (!Array.isArray(backup.customCards) || !backup.cardOverrides || typeof backup.cardOverrides !== 'object' || Array.isArray(backup.cardOverrides)) {
+        throw new Error('備份資料不完整或格式錯誤。');
+      }
+      const ids = new Set();
+      const custom = backup.customCards.map((card, index) => {
+        if (!card || typeof card.zh !== 'string' || !card.zh.trim() || card.zh.length > 500 || !CARD_DECK_ORDER.includes(card.deck)) {
+          throw new Error(`第 ${index + 1} 張自訂牌卡資料無效。`);
+        }
+        const id = String(card.id || `import-${index + 1}`);
+        if (!/^[a-z0-9_-]{1,120}$/iu.test(id)) throw new Error('備份中的自訂牌卡 ID 格式無效。');
+        if (ids.has(id)) throw new Error('備份內有重複的自訂牌卡 ID。');
+        ids.add(id);
+        return { id, zh: card.zh.trim(), deck: card.deck, title: typeof card.title === 'string' ? card.title.slice(0, 60) : '', image: CARD_IMAGE_DEFAULT };
+      });
+      const validKeys = new Set(Object.values(CARD_DATA).flatMap(deck => deck.cards.map(card => card.id)));
+      custom.forEach(card => validKeys.add(`custom:${card.id}`));
+      const overrides = Object.create(null);
+      for (const [key, value] of Object.entries(backup.cardOverrides)) {
+        if (!validKeys.has(key) || !value || typeof value !== 'object' || Array.isArray(value)) throw new Error('備份中的牌卡修改格式錯誤。');
+        const title = typeof value.title === 'string' ? value.title.trim() : '';
+        const zh = typeof value.zh === 'string' ? value.zh.trim() : '';
+        const deck = value.deck;
+        const image = typeof value.image === 'string' ? value.image : CARD_IMAGE_DEFAULT;
+        if (title.length > 60 || !zh || zh.length > 500 || !CARD_DECK_ORDER.includes(deck)) throw new Error('備份中有不完整的牌卡修改。');
+        if (!(image === 'friends' || image === 'none' || /^uploaded:[a-z0-9-]+$/iu.test(image))) throw new Error('備份中的卡面圖像格式無效。');
+        overrides[key] = { title, zh, deck, image };
+      }
+      const images = backup.images && typeof backup.images === 'object' && !Array.isArray(backup.images) ? backup.images : {};
+      const imageBlobs = Object.create(null);
+      for (const imageId of uploadedImageRefs(overrides)) {
+        if (!Object.hasOwn(images, imageId) || typeof images[imageId] !== 'string') throw new Error('備份缺少牌卡使用的圖片資料。');
+        const blob = dataUrlToBlob(images[imageId]);
+        if (blob.size > 8 * 1024 * 1024) throw new Error('備份中的單張圖片超過 8 MB。');
+        imageBlobs[imageId] = blob;
+      }
+      return { customCards: custom, cardOverrides: overrides, images: imageBlobs };
+    }
+
+    async function importCardBackup(event) {
+      const input = event.target;
+      const file = input.files?.[0];
+      input.value = '';
+      if (!file) return;
+      if (file.size > 120 * 1024 * 1024) {
+        showCustomModal('備份檔太大', '單一備份檔上限為 120 MB。');
+        return;
+      }
+      const importedImageIds = [];
+      let importedDataCommitted = false;
+      try {
+        const backup = validateBackup(JSON.parse(await file.text()));
+        const unsavedNote = editorDirty ? '目前表單中尚未儲存的修改也會放棄。' : '';
+        if (!window.confirm(`匯入會取代這個瀏覽器目前的牌卡修改與自訂牌卡。建議先匯出目前資料。${unsavedNote}要繼續嗎？`)) return;
+        const oldImageRefs = uploadedImageRefs(cardOverrides);
+        const importedOverrides = Object.create(null);
+        const importedImageMap = new Map();
+        for (const [key, value] of Object.entries(backup.cardOverrides)) {
+          if (value.image.startsWith('uploaded:')) {
+            const sourceImageId = value.image.slice('uploaded:'.length);
+            let imageId = importedImageMap.get(sourceImageId);
+            if (!imageId) {
+              imageId = `import-${createLocalId()}`;
+              importedImageMap.set(sourceImageId, imageId);
+              importedImageIds.push(imageId);
+              await putCardImage(imageId, backup.images[sourceImageId]);
+            }
+            importedOverrides[key] = { ...value, image: `uploaded:${imageId}` };
+          } else {
+            importedOverrides[key] = value;
+          }
+        }
+
+        const previousCustomStorage = localStorage.getItem(CUSTOM_CARDS_KEY);
+        const previousOverridesStorage = localStorage.getItem(CARD_OVERRIDES_KEY);
+        try {
+          localStorage.setItem(CUSTOM_CARDS_KEY, JSON.stringify(backup.customCards));
+          localStorage.setItem(CARD_OVERRIDES_KEY, JSON.stringify(importedOverrides));
+        } catch (storageError) {
+          let rollbackFailed = false;
+          try {
+            if (previousCustomStorage === null) localStorage.removeItem(CUSTOM_CARDS_KEY);
+            else localStorage.setItem(CUSTOM_CARDS_KEY, previousCustomStorage);
+          } catch (error) { rollbackFailed = true; }
+          try {
+            if (previousOverridesStorage === null) localStorage.removeItem(CARD_OVERRIDES_KEY);
+            else localStorage.setItem(CARD_OVERRIDES_KEY, previousOverridesStorage);
+          } catch (error) { rollbackFailed = true; }
+          if (rollbackFailed) throw new Error('匯入遇到儲存空間問題，瀏覽器也無法完整復原資料。請重新整理頁面並先匯出目前資料。');
+          throw storageError;
+        }
+        importedDataCommitted = true;
+
+        customCards = backup.customCards;
+        cardOverrides = importedOverrides;
+        editorDirty = false;
+        pendingImageBlob = null;
+        releasePendingImagePreview();
+        rebuildDrawPools(true);
+        currentCard = null;
+        selectedEditorCardKey = getAllEffectiveCards()[0]?.key || null;
+        document.getElementById('editCurrentCardBtn').disabled = true;
+        document.getElementById('cardQuestionZh').textContent = '請先點擊下方抽牌鈕開始！';
+        document.getElementById('cardTitleDisplay').classList.add('hidden');
+        document.getElementById('cardIndexLabel').textContent = '#0';
+        document.getElementById('cardCategoryName').textContent = '暖身破冰';
+        document.getElementById('currentDrawerDisplay').textContent = '抽卡人：玩家';
+        document.getElementById('cardImageDisplay').src = 'assets/friends-together.webp';
+        document.getElementById('cardImageDisplay').alt = '好朋友圍坐分享的插畫';
+        document.getElementById('cardImageDisplay').classList.remove('invisible');
+        document.getElementById('cardBadgeColor').className = `w-2.5 h-2.5 rounded-full ${CARD_DATA.warmup.badgeColor}`;
+        const flipper = document.getElementById('cardFlipper');
+        flipper.classList.remove('rotate-y-180');
+        isFlipped = false;
+        renderCustomCardList();
+        renderCardLibrary();
+        populateCardEditor();
+        document.getElementById('editorSaveStatus').textContent = '備份已匯入';
+        document.getElementById('editorSaveStatus').className = 'status-live text-xs text-emerald-700';
+        await deleteImagesNoLongerUsed(oldImageRefs);
+        showCustomModal('匯入完成', '牌卡修改、自訂牌卡和圖片已還原到這個瀏覽器。');
+      } catch (error) {
+        if (!importedDataCommitted) await Promise.all(importedImageIds.map(imageId => deleteCardImage(imageId)));
+        showCustomModal(importedDataCommitted ? '備份已匯入' : '匯入失敗', importedDataCommitted
+          ? '資料已儲存，但畫面更新時發生問題。重新整理即可看到匯入的牌卡。'
+          : (error.message || '無法讀取這份備份，請確認原資料仍完整後再試一次。'));
+      }
     }
 
     // Initialize Web Audio API on first interaction
@@ -705,60 +1641,31 @@
     // Setup and Statistics Helpers
     // ------------------------------------------------------------------
     function resetDecks(showAlert = true) {
-      Object.keys(CARD_DATA).forEach(cat => {
-        // Deep copy built-in cards
-        drawPools[cat] = [...CARD_DATA[cat].cards];
-        // Also re-add custom cards for this category
-        customCards.filter(c => c.deck === cat).forEach(c => {
-          drawPools[cat].push({ zh: c.zh, custom: true, id: c.id });
-        });
-      });
-      
-      // Reset history list
-      historyList = [];
-      renderHistory();
-      
-      updateStatistics();
-      
+      rebuildDrawPools(true);
       if (showAlert) {
-        showCustomModal("重置成功", "已為您將所有卡組重新洗牌，並清空及重設抽取歷史紀錄！");
+        showCustomModal("牌組已重新洗牌", "本局抽取紀錄已清空，個人牌卡修改和自訂牌卡都已保留。");
         playSound('success');
       }
     }
 
     function updateStatistics() {
-      const customPerDeck = {};
-      customCards.forEach(c => {
-        customPerDeck[c.deck] = (customPerDeck[c.deck] || 0) + 1;
+      const totals = { warmup: 0, one_star: 0, two_star: 0, three_star: 0 };
+      getAllEffectiveCards().forEach(card => { totals[card.deck] += 1; });
+      CARD_DECK_ORDER.forEach(deck => {
+        const countId = `count_${deck}`;
+        const countElement = document.getElementById(countId);
+        if (countElement) countElement.textContent = `${drawPools[deck].length}/${totals[deck]}`;
       });
-
-      const wCount = drawPools.warmup.length;
-      const oCount = drawPools.one_star.length;
-      const tCount = drawPools.two_star.length;
-      const thCount = drawPools.three_star.length;
-
-      // 改成動態計算（加多少題都自動吻合）
-      const wMax = CARD_DATA.warmup.cards.length + (customPerDeck.warmup || 0);
-      const oMax = CARD_DATA.one_star.cards.length + (customPerDeck.one_star || 0);
-      const tMax = CARD_DATA.two_star.cards.length + (customPerDeck.two_star || 0);
-      const thMax = CARD_DATA.three_star.cards.length + (customPerDeck.three_star || 0);
-
-      document.getElementById("count_warmup").innerText = `${wCount}/${wMax}`;
-      document.getElementById("count_one_star").innerText = `${oCount}/${oMax}`;
-      document.getElementById("count_two_star").innerText = `${tCount}/${tMax}`;
-      document.getElementById("count_three_star").innerText = `${thCount}/${thMax}`;
 
       // Update total remaining checked cards
       let total = 0;
       let maxTotal = 0;
       activeCategories.forEach(cat => {
-        const builtIn = CARD_DATA[cat].cards.length;
-        const custom = customPerDeck[cat] || 0;
         total += drawPools[cat].length;
-        maxTotal += builtIn + custom;
+        maxTotal += totals[cat];
       });
 
-      document.getElementById("totalPoolCount").innerHTML = `${total} / ${maxTotal} <span class="text-xs text-slate-500 font-normal">張卡片</span>`;
+      document.getElementById("totalPoolCount").textContent = `${total} / ${maxTotal} 張卡片`;
     }
 
     function handleCategoryChange() {
@@ -824,7 +1731,7 @@
       const indicator = document.getElementById("activePlayerIndicator");
 
       // Empty container first
-      container.innerHTML = "";
+      container.replaceChildren();
 
       if (players.length === 0) {
         hint.classList.remove("hidden");
@@ -846,15 +1753,29 @@
             : 'bg-[#ffffff] hover:bg-brand-creamStrong text-brand-muted border border-brand-hairline'
         }`;
         
-        playerBtn.innerHTML = `
-          <span>👤 ${player}</span>
-          <button onclick="event.stopPropagation(); removePlayer(${idx})" class="hover:text-rose-500 font-bold ml-1 text-[11px]" title="刪除此玩家">✕</button>
-        `;
+        const initial = document.createElement('span');
+        initial.className = `inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${isCurrent ? 'bg-white/20 text-white' : 'bg-brand-coral/10 text-brand-coral'}`;
+        initial.textContent = player.trim().slice(0, 1).toLocaleUpperCase();
+        initial.setAttribute('aria-hidden', 'true');
+        const name = document.createElement('span');
+        name.className = 'max-w-36 truncate';
+        name.textContent = player;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'ml-1 rounded px-1 text-[11px] font-bold hover:text-rose-700';
+        remove.title = '移除這位分享者';
+        remove.setAttribute('aria-label', `移除 ${player}`);
+        remove.textContent = '×';
+        remove.addEventListener('click', event => {
+          event.stopPropagation();
+          removePlayer(idx);
+        });
+        playerBtn.replaceChildren(initial, name, remove);
         container.appendChild(playerBtn);
       });
 
       // Update current turn texts
-      document.getElementById("currentPlayerName").innerText = `👤 ${players[currentPlayerIndex]}`;
+      document.getElementById("currentPlayerName").innerText = players[currentPlayerIndex];
       const nextIndex = (currentPlayerIndex + 1) % players.length;
       document.getElementById("nextPlayerName").innerText = players[nextIndex];
     }
@@ -885,11 +1806,8 @@
 
       // If all selected categories are empty, automatic reload warning
       if (availableCategories.length === 0) {
-        showCustomModal("卡池抽空囉！", "您勾選的卡組皆已全數抽取完畢！系統將會自動重置您勾選的卡組，讓您繼續玩得盡興。");
-        activeCategories.forEach(cat => {
-          drawPools[cat] = [...CARD_DATA[cat].cards];
-        });
-        updateStatistics();
+        showCustomModal("卡池抽空囉！", "目前勾選的牌組都抽完了。重新洗牌後，本局歷史會清空，你們的牌卡修改仍會保留。");
+        resetDecks(false);
         return;
       }
 
@@ -905,15 +1823,14 @@
       currentCategoryPool.splice(cardIndexInPool, 1);
 
       // Setup current card state
-      const builtInCount = CARD_DATA[selectedCategoryKey].cards.length;
-      const customCount = customCards.filter(c => c.deck === selectedCategoryKey).length;
+      const deckCount = getAllEffectiveCards().filter(card => card.deck === selectedCategoryKey).length;
       currentCard = {
+        ...cardObj,
         categoryKey: selectedCategoryKey,
         categoryName: CARD_DATA[selectedCategoryKey].name,
         badgeColor: CARD_DATA[selectedCategoryKey].badgeColor,
-        zh: cardObj.zh,
         isCustom: !!cardObj.custom,
-        index: (builtInCount + customCount) - currentCategoryPool.length
+        index: deckCount - currentCategoryPool.length
       };
 
       // Set player name if multi-player mode
@@ -922,12 +1839,8 @@
         drawerText = `👤 抽卡人：${players[currentPlayerIndex]}`;
       }
 
-      // Sync Card Back DOM elements
-      document.getElementById("cardCategoryName").innerText = currentCard.categoryName;
-      document.getElementById("cardBadgeColor").className = `w-2.5 h-2.5 rounded-full ${currentCard.badgeColor}`;
-      document.getElementById("cardQuestionZh").innerText = currentCard.zh;
-      document.getElementById("cardIndexLabel").innerText = `#${currentCard.index}`;
-      document.getElementById("currentDrawerDisplay").innerText = drawerText;
+      currentCard.drawerText = drawerText;
+      updateCurrentCardView();
 
       // Reset favorite icon status
       // (favorites feature removed)
@@ -948,8 +1861,10 @@
 
       // Register into history
       historyList.unshift({
+        key: currentCard.key,
         categoryName: currentCard.categoryName,
         badgeColor: currentCard.badgeColor,
+        title: currentCard.title,
         zh: currentCard.zh
       });
 
@@ -984,22 +1899,38 @@
       countLabel.innerText = `已抽取 ${historyList.length} 張`;
 
       if (historyList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-6">尚無抽取歷史，開始抽取後，卡片將記錄於此。</p>`;
+        container.replaceChildren();
+        const empty = document.createElement('p');
+        empty.className = 'text-xs text-brand-muted italic text-center py-6';
+        empty.textContent = '還沒有聊過的話題，抽一張牌後會記錄在這裡。';
+        container.appendChild(empty);
         return;
       }
 
-      container.innerHTML = "";
+      container.replaceChildren();
       historyList.forEach((item) => {
-        const div = document.createElement("div");
-        div.className = "p-3 bg-[#ffffff]/60 border border-brand-hairline hover:border-brand-coral/25 rounded-2xl transition duration-150 flex flex-col gap-1";
-        div.innerHTML = `
-          <div class="flex items-center gap-2 text-xs">
-            <span class="w-2 h-2 rounded-full ${item.badgeColor}"></span>
-            <span class="text-brand-muted font-bold">${item.categoryName}</span>
-          </div>
-          <div class="text-brand-ink text-xs font-semibold">${item.zh}</div>
-        `;
-        container.appendChild(div);
+        const row = document.createElement('div');
+        row.className = 'p-3 bg-white/60 border border-brand-hairline hover:border-brand-coral/25 rounded-2xl transition flex items-start justify-between gap-3';
+        const copy = document.createElement('div');
+        copy.className = 'min-w-0 flex-1';
+        const category = document.createElement('p');
+        category.className = 'text-xs text-brand-muted font-bold';
+        category.textContent = item.title ? `${item.categoryName} · ${item.title}` : item.categoryName;
+        const question = document.createElement('p');
+        question.className = 'mt-1 break-words text-xs font-semibold text-brand-ink';
+        question.textContent = item.zh;
+        copy.append(category, question);
+        row.appendChild(copy);
+        if (item.key) {
+          const editButton = document.createElement('button');
+          editButton.type = 'button';
+          editButton.className = 'shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-brand-coral hover:bg-brand-coral/10';
+          editButton.setAttribute('aria-label', `編輯「${displayCardTitle({ title: item.title || '', zh: item.zh })}」`);
+          editButton.textContent = '編輯';
+          editButton.addEventListener('click', () => openCardEditor(item.key));
+          row.appendChild(editButton);
+        }
+        container.appendChild(row);
       });
     }
 
