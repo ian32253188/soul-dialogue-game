@@ -105,6 +105,12 @@
     .card-editor-header {
       flex: 0 0 auto;
     }
+    .card-editor-disclosure > summary::-webkit-details-marker {
+      display: none;
+    }
+    .card-editor-disclosure[open] .disclosure-chevron {
+      transform: rotate(180deg);
+    }
     .editor-card-row[aria-pressed="true"] {
       border-color: #cc785c;
       background: #f7e9e1;
@@ -121,14 +127,6 @@
       object-fit: contain;
       object-position: center;
       margin: 0 auto;
-    }
-    .image-preview {
-      width: 112px;
-      height: 82px;
-      object-fit: cover;
-      border: 1px solid #e6dfd8;
-      border-radius: 14px;
-      background: #efe9de;
     }
     .status-live {
       min-height: 1.25rem;
@@ -196,7 +194,7 @@
         min-width: 0;
         min-height: 40px;
         padding: 6px 4px !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
         white-space: nowrap;
       }
       .card-editor-close {
@@ -361,47 +359,6 @@
           </button>
         </div>
 
-        <!-- Custom Card Add Box -->
-        <div class="bg-brand-card/40 border border-brand-hairline p-5 rounded-3xl backdrop-blur-md shadow-sm space-y-4 font-sans">
-          <h2 class="text-xl font-bold text-brand-ink flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>
-            ✏️ 新增自訂牌卡
-          </h2>
-          <div class="space-y-3">
-            <div>
-              <label class="text-xs text-brand-muted mb-1 block">問題內容 <span class="text-rose-400">*</span></label>
-              <textarea id="customCardZh" rows="2" placeholder="輸入你的問題..." class="w-full bg-[#ffffff] border border-brand-hairline focus:border-brand-coral focus:outline-none rounded-xl px-3.5 py-2 text-sm text-brand-ink transition resize-none"></textarea>
-            </div>
-            <div>
-              <label class="text-xs text-brand-muted mb-1 block">加入哪個卡組</label>
-              <select id="customCardDeck" class="w-full bg-[#ffffff] border border-brand-hairline focus:border-brand-coral focus:outline-none rounded-xl px-3.5 py-2 text-sm text-brand-ink transition">
-                <option value="warmup">暖身破冰</option>
-                <option value="one_star">一星連結</option>
-                <option value="two_star">二星連結</option>
-                <option value="three_star">三星連結</option>
-              </select>
-            </div>
-            <button onclick="addCustomCard()" class="w-full py-2.5 bg-brand-coral hover:bg-brand-coralActive text-white font-bold text-sm rounded-xl transition shadow-sm active:scale-95">
-              ➕ 新增到牌組
-            </button>
-          </div>
-          <p class="text-[11px] text-brand-muted italic text-center">※ 自訂卡片儲存在此瀏覽器，關掉再開還在！</p>
-        </div>
-
-        <!-- Custom Cards Management Section -->
-        <section id="customCardsSection" class="mt-8 border-t border-brand-hairline pt-8 hidden font-sans">
-          <div class="bg-brand-card/30 border border-brand-hairline p-5 rounded-3xl">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold text-brand-ink flex items-center gap-2">
-                ✏️ 我的自訂牌卡
-              </h3>
-              <span id="customCardCount" class="text-xs bg-brand-coral/10 text-brand-coral border border-brand-coral/20 px-2.5 py-0.5 rounded-full font-bold">0 張</span>
-            </div>
-            <div id="customCardList" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-sm">
-            </div>
-          </div>
-        </section>
-
       </section>
 
       <!-- Right Column: Card Interactive Area -->
@@ -506,7 +463,7 @@
         <header class="card-editor-header flex items-start justify-between gap-4 border-b border-brand-hairline px-5 py-5 md:px-7">
           <div class="card-editor-header-copy min-w-0">
             <h2 id="cardEditorTitle" class="card-editor-title text-xl font-serif font-bold text-brand-ink">我的牌卡</h2>
-            <p class="card-editor-description mt-1 text-xs text-brand-muted">編輯牌名、題目、分類與卡面圖像。</p>
+            <p class="card-editor-description mt-1 text-xs text-brand-muted">修改題目與分類，卡面圖像保持原樣。</p>
           </div>
           <div class="card-editor-header-actions flex shrink-0 flex-wrap items-center justify-end gap-2">
             <button type="button" onclick="exportCardBackup()" class="card-editor-action editor-control rounded-lg border border-brand-hairline bg-white px-3 py-2 text-xs font-semibold text-brand-ink hover:bg-brand-card">匯出備份</button>
@@ -520,6 +477,33 @@
         </header>
 
         <div class="card-editor-scroll flex-1 px-5 py-4 md:px-7">
+          <details id="customCardComposer" class="card-editor-disclosure mb-4 overflow-hidden rounded-xl border border-brand-hairline bg-brand-card/30 font-sans">
+            <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-brand-ink">
+              <span class="flex items-center gap-2">
+                <svg aria-hidden="true" class="h-4 w-4 text-brand-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                新增自訂牌卡
+              </span>
+              <svg aria-hidden="true" class="disclosure-chevron h-4 w-4 text-brand-muted transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="space-y-3 border-t border-brand-hairline px-4 py-4">
+              <label class="block">
+                <span class="mb-1 block text-xs font-semibold text-brand-ink">問題內容</span>
+                <textarea id="customCardZh" rows="2" placeholder="輸入想和朋友分享的問題…" class="editor-control w-full resize-none rounded-xl border border-brand-hairline bg-white px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted"></textarea>
+              </label>
+              <label class="block">
+                <span class="mb-1 block text-xs font-semibold text-brand-ink">加入哪個卡組</span>
+                <select id="customCardDeck" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3.5 py-2.5 text-sm text-brand-ink">
+                  <option value="warmup">暖身破冰</option>
+                  <option value="one_star">一星連結</option>
+                  <option value="two_star">二星連結</option>
+                  <option value="three_star">三星連結</option>
+                </select>
+              </label>
+              <button type="button" onclick="addCustomCard()" class="editor-control w-full rounded-xl bg-brand-coral px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-coralActive">新增到牌組</button>
+              <p class="text-xs text-brand-muted">自訂牌卡會保存在這個瀏覽器。</p>
+            </div>
+          </details>
+
           <div class="flex flex-col gap-3 sm:flex-row">
             <label class="relative min-w-0 flex-1">
               <span class="sr-only">搜尋牌卡</span>
@@ -543,6 +527,14 @@
           </div>
           <div id="editorCardList" role="listbox" aria-label="牌卡清單" class="mt-2 max-h-52 overflow-y-auto rounded-2xl border border-brand-hairline bg-white/70 p-1"></div>
 
+          <details id="customCardsSection" class="card-editor-disclosure hidden mt-3 overflow-hidden rounded-xl border border-brand-hairline bg-white/70 font-sans">
+            <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-brand-ink">
+              <span>我的自訂牌卡</span>
+              <span id="customCardCount" class="rounded-full border border-brand-coral/20 bg-brand-coral/10 px-2.5 py-1 text-xs font-bold text-brand-coral">0 張</span>
+            </summary>
+            <div id="customCardList" class="max-h-64 space-y-2 overflow-y-auto border-t border-brand-hairline p-3 text-sm"></div>
+          </details>
+
           <section id="editorForm" aria-labelledby="editorFormTitle" class="mt-5 border-t border-brand-hairline pt-5">
             <div class="mb-4 flex items-center justify-between gap-3">
               <h3 id="editorFormTitle" class="text-lg font-serif font-bold text-brand-ink">編輯這張牌</h3>
@@ -550,41 +542,18 @@
             </div>
             <div class="grid gap-4">
               <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold text-brand-ink">牌名</span>
-                <input id="editorCardTitle" type="text" maxlength="60" oninput="markEditorDirty(); renderEditorPreview()" placeholder="為這張牌取個名字" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base text-brand-ink placeholder:text-brand-muted">
-              </label>
-              <label class="block">
                 <span class="mb-1.5 block text-xs font-semibold text-brand-ink">牌卡文字</span>
-                <textarea id="editorCardText" rows="3" maxlength="500" oninput="markEditorDirty(); renderEditorPreview()" placeholder="寫下想和朋友分享的問題…" class="editor-control w-full resize-y rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base leading-relaxed text-brand-ink placeholder:text-brand-muted"></textarea>
+                <textarea id="editorCardText" rows="3" maxlength="500" oninput="markEditorDirty()" placeholder="寫下想和朋友分享的問題…" class="editor-control w-full resize-y rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base leading-relaxed text-brand-ink placeholder:text-brand-muted"></textarea>
               </label>
               <label class="block sm:max-w-sm">
                 <span class="mb-1.5 block text-xs font-semibold text-brand-ink">所屬分類</span>
-                <select id="editorCardDeck" onchange="markEditorDirty(); renderEditorPreview()" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base text-brand-ink">
+                <select id="editorCardDeck" onchange="markEditorDirty()" class="editor-control w-full rounded-xl border border-brand-hairline bg-white px-3.5 py-3 text-base text-brand-ink">
                   <option value="warmup">暖身破冰</option>
                   <option value="one_star">一星連結</option>
                   <option value="two_star">二星連結</option>
                   <option value="three_star">三星連結</option>
                 </select>
               </label>
-              <div>
-                <span class="mb-2 block text-xs font-semibold text-brand-ink">卡面圖像</span>
-                <div class="flex flex-wrap items-center gap-3">
-                  <img id="editorImagePreview" class="image-preview" src="assets/friends-together.webp" alt="目前牌卡插畫預覽">
-                  <div id="editorImageEmptyState" class="image-preview hidden items-center justify-center px-3 text-center text-xs text-brand-muted">這張牌不使用圖像</div>
-                  <div class="flex flex-col items-start gap-2">
-                    <button type="button" onclick="document.getElementById('editorImageFile').click()" class="editor-control rounded-lg border border-brand-hairline bg-white px-3 py-2 text-sm font-semibold text-brand-ink hover:bg-brand-card">從裝置選圖</button>
-                    <button type="button" onclick="useDefaultCardImage()" class="editor-control text-xs font-medium text-brand-muted underline underline-offset-4 hover:text-brand-coral">使用好友相聚插畫</button>
-                    <button type="button" onclick="clearCardImage()" class="editor-control text-xs font-medium text-brand-muted underline underline-offset-4 hover:text-brand-coral">不使用圖像</button>
-                    <input id="editorImageFile" type="file" accept="image/*" class="hidden" onchange="previewCardImage(event)">
-                  </div>
-                </div>
-                <p class="mt-2 text-xs text-brand-muted">支援常見圖片格式，單張上限 8 MB；圖片留在這個瀏覽器。</p>
-              </div>
-            </div>
-            <div id="editorPreview" class="mt-4 rounded-2xl border border-brand-hairline bg-white/70 p-4">
-              <p class="text-[11px] font-semibold text-brand-muted">牌面預覽</p>
-              <p id="editorPreviewTitle" class="mt-2 hidden text-sm font-semibold text-brand-coral"></p>
-              <p id="editorPreviewText" class="mt-1 break-words font-serif text-lg font-semibold leading-relaxed text-brand-ink"></p>
             </div>
             <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
               <p id="editorSaveStatus" role="status" aria-live="polite" class="status-live text-xs text-brand-muted"></p>
@@ -760,9 +729,6 @@
     let cardOverrides = {};
     let selectedEditorCardKey = null;
     let editorDirty = false;
-    let editorDraftImageRef = CARD_IMAGE_DEFAULT;
-    let pendingImageBlob = null;
-    let pendingImageObjectUrl = null;
     let imageDatabasePromise = null;
     const imageObjectUrls = new Map();
 
@@ -993,7 +959,10 @@
       const deck = deckSelect.value;
 
       if (!zh) {
-        showCustomModal('請填寫問題', '自訂牌卡的問題內容不能為空！');
+        const status = document.getElementById('editorSaveStatus');
+        status.textContent = '請先輸入自訂牌卡的問題內容。';
+        status.className = 'status-live text-xs text-rose-700';
+        zhInput.focus();
         return;
       }
 
@@ -1001,15 +970,24 @@
       customCards.push(newCard);
       if (!saveCustomCardsToStorage()) {
         customCards.pop();
-        showCustomModal('無法新增牌卡', '瀏覽器儲存空間不足。請先匯出備份或清理不需要的牌卡圖片，再試一次。');
+        const status = document.getElementById('editorSaveStatus');
+        status.textContent = '儲存空間不足，請先匯出備份或移除不需要的自訂牌卡。';
+        status.className = 'status-live text-xs text-rose-700';
         return;
       }
 
       zhInput.value = '';
       rebuildDrawPools(false);
       renderCustomCardList();
+      selectedEditorCardKey = `custom:${newCard.id}`;
+      document.getElementById('editorCardSearch').value = zh;
+      document.getElementById('editorDeckFilter').value = 'all';
+      document.getElementById('customCardComposer').open = false;
+      renderCardLibrary();
+      populateCardEditor();
+      document.getElementById('editorSaveStatus').textContent = '已新增並儲存在這個瀏覽器';
+      document.getElementById('editorSaveStatus').className = 'status-live text-xs text-emerald-700';
       playSound('success');
-      showCustomModal('新增成功！', `「${zh.slice(0,20)}${zh.length>20?'…':''}」已加入「${CARD_DATA[deck].name}」牌組，並儲存在此瀏覽器中。`);
     }
 
     async function deleteCustomCard(id) {
@@ -1037,7 +1015,12 @@
       await deleteImagesNoLongerUsed(oldImageRefs);
       rebuildDrawPools(false);
       renderCustomCardList();
+      if (selectedEditorCardKey === key) {
+        selectedEditorCardKey = null;
+        document.getElementById('editorCardSearch').value = '';
+      }
       renderCardLibrary();
+      populateCardEditor();
       playSound('flip');
     }
 
@@ -1102,8 +1085,6 @@
       if (!dialog.open) dialog.showModal();
       selectedEditorCardKey = cardKey || currentCard?.key || getAllEffectiveCards()[0]?.key || null;
       editorDirty = false;
-      pendingImageBlob = null;
-      releasePendingImagePreview();
       renderCardLibrary();
       populateCardEditor();
       document.getElementById('editorCardSearch').focus();
@@ -1116,14 +1097,7 @@
     function closeCardEditor() {
       if (editorDirty && !window.confirm('這張牌還有未儲存的修改，要放棄嗎？')) return;
       editorDirty = false;
-      pendingImageBlob = null;
-      releasePendingImagePreview();
       document.getElementById('cardEditorDialog').close();
-    }
-
-    function releasePendingImagePreview() {
-      if (pendingImageObjectUrl) URL.revokeObjectURL(pendingImageObjectUrl);
-      pendingImageObjectUrl = null;
     }
 
     function renderCardLibrary() {
@@ -1177,8 +1151,6 @@
       if (key === selectedEditorCardKey) return;
       if (editorDirty && !window.confirm('目前牌卡還有未儲存的修改，要放棄並切換嗎？')) return;
       editorDirty = false;
-      pendingImageBlob = null;
-      releasePendingImagePreview();
       selectedEditorCardKey = key;
       renderCardLibrary();
       populateCardEditor();
@@ -1193,107 +1165,15 @@
       const form = document.getElementById('editorForm');
       form.classList.toggle('hidden', !card);
       if (!card) return;
-      document.getElementById('editorCardTitle').value = card.title || '';
       document.getElementById('editorCardText').value = card.zh || '';
       document.getElementById('editorCardDeck').value = card.deck;
-      editorDraftImageRef = card.image || CARD_IMAGE_DEFAULT;
       document.getElementById('editorSaveStatus').textContent = '';
-      renderEditorPreview();
-      renderEditorImagePreview();
     }
 
     function markEditorDirty() {
       editorDirty = true;
       document.getElementById('editorSaveStatus').textContent = '有尚未儲存的修改';
       document.getElementById('editorSaveStatus').className = 'status-live text-xs text-brand-coral';
-    }
-
-    function renderEditorPreview() {
-      const title = document.getElementById('editorCardTitle').value.trim();
-      const text = document.getElementById('editorCardText').value.trim();
-      const titleElement = document.getElementById('editorPreviewTitle');
-      titleElement.textContent = title;
-      titleElement.classList.toggle('hidden', !title);
-      document.getElementById('editorPreviewText').textContent = text || '牌卡文字預覽會顯示在這裡。';
-    }
-
-    async function renderEditorImagePreview() {
-      const preview = document.getElementById('editorImagePreview');
-      if (pendingImageObjectUrl) {
-        preview.src = pendingImageObjectUrl;
-        return;
-      }
-      const ref = editorDraftImageRef;
-      try {
-        const src = await imageSourceForCard(ref);
-        if (editorDraftImageRef === ref && !pendingImageObjectUrl) {
-          const hasImage = !!src;
-          preview.classList.toggle('hidden', !hasImage);
-          document.getElementById('editorImageEmptyState').classList.toggle('hidden', hasImage);
-          document.getElementById('editorImageEmptyState').classList.toggle('flex', !hasImage);
-          if (hasImage) {
-            preview.src = src;
-            preview.alt = '目前牌卡圖像預覽';
-          }
-        }
-      } catch (error) {
-        preview.src = 'assets/friends-together.webp';
-        preview.classList.remove('hidden');
-        document.getElementById('editorImageEmptyState').classList.add('hidden');
-        preview.alt = '預設好友相聚插畫';
-      }
-    }
-
-    async function optimizeUploadedImage(file) {
-      if (!file.type.startsWith('image/')) throw new Error('請選擇圖片檔案。');
-      if (file.size > 8 * 1024 * 1024) throw new Error('圖片超過 8 MB，請先縮小後再上傳。');
-      if (!window.createImageBitmap) return file;
-      const bitmap = await createImageBitmap(file);
-      const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-      const context = canvas.getContext('2d');
-      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      bitmap.close?.();
-      const optimized = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.84));
-      return optimized || file;
-    }
-
-    async function previewCardImage(event) {
-      const input = event.target;
-      const file = input.files?.[0];
-      input.value = '';
-      if (!file) return;
-      try {
-        pendingImageBlob = await optimizeUploadedImage(file);
-        releasePendingImagePreview();
-        pendingImageObjectUrl = URL.createObjectURL(pendingImageBlob);
-        editorDraftImageRef = 'pending-upload';
-        document.getElementById('editorImagePreview').src = pendingImageObjectUrl;
-        document.getElementById('editorImagePreview').alt = '新選擇的牌卡圖像預覽';
-        document.getElementById('editorImagePreview').classList.remove('hidden');
-        document.getElementById('editorImageEmptyState').classList.add('hidden');
-        markEditorDirty();
-      } catch (error) {
-        showCustomModal('無法使用這張圖片', error.message || '請改選其他圖片。');
-      }
-    }
-
-    function useDefaultCardImage() {
-      pendingImageBlob = null;
-      releasePendingImagePreview();
-      editorDraftImageRef = CARD_IMAGE_DEFAULT;
-      markEditorDirty();
-      renderEditorImagePreview();
-    }
-
-    function clearCardImage() {
-      pendingImageBlob = null;
-      releasePendingImagePreview();
-      editorDraftImageRef = 'none';
-      markEditorDirty();
-      renderEditorImagePreview();
     }
 
     function uploadedImageRefs(overrides) {
@@ -1333,7 +1213,7 @@
     async function saveCardEdits() {
       const card = selectedEditorCard();
       if (!card) return;
-      const title = document.getElementById('editorCardTitle').value.trim();
+      const title = card.title || '';
       const zh = document.getElementById('editorCardText').value.trim();
       const deck = document.getElementById('editorCardDeck').value;
       if (!zh) {
@@ -1343,23 +1223,12 @@
         return;
       }
       if (title.length > 60 || zh.length > 500 || !CARD_DECK_ORDER.includes(deck)) return;
-      const oldImageRefs = uploadedImageRefs(cardOverrides);
-      let image = editorDraftImageRef || CARD_IMAGE_DEFAULT;
-      let newImageId = null;
       try {
-        if (pendingImageBlob) {
-          newImageId = createLocalId();
-          await putCardImage(newImageId, pendingImageBlob);
-          image = `uploaded:${newImageId}`;
-        }
         const nextOverrides = {
           ...cardOverrides,
-          [card.key]: { title, zh, deck, image }
+          [card.key]: { title, zh, deck, image: card.image || CARD_IMAGE_DEFAULT }
         };
-        if (!saveCardOverridesToStorage(nextOverrides)) throw new Error('瀏覽器儲存空間不足，請先匯出備份或移除大型圖片。');
-        pendingImageBlob = null;
-        editorDraftImageRef = image;
-        releasePendingImagePreview();
+        if (!saveCardOverridesToStorage(nextOverrides)) throw new Error('瀏覽器儲存空間不足，請先匯出備份或移除不需要的自訂牌卡。');
         editorDirty = false;
         refreshCardViewsAfterEdit(card.key);
         document.getElementById('editorSaveStatus').textContent = '已儲存到這個瀏覽器';
@@ -1367,10 +1236,8 @@
         populateCardEditor();
         document.getElementById('editorSaveStatus').textContent = '已儲存到這個瀏覽器';
         document.getElementById('editorSaveStatus').className = 'status-live text-xs text-emerald-700';
-        await deleteImagesNoLongerUsed(oldImageRefs);
         playSound('success');
       } catch (error) {
-        if (newImageId && !cardOverrides[card.key]?.image?.endsWith(newImageId)) await deleteCardImage(newImageId);
         document.getElementById('editorSaveStatus').textContent = error.message || '儲存失敗，請再試一次。';
         document.getElementById('editorSaveStatus').className = 'status-live text-xs text-rose-700';
       }
@@ -1392,8 +1259,6 @@
         return;
       }
       editorDirty = false;
-      pendingImageBlob = null;
-      releasePendingImagePreview();
       refreshCardViewsAfterEdit(card.key);
       populateCardEditor();
       await deleteImagesNoLongerUsed(oldImageRefs);
@@ -1414,8 +1279,6 @@
         return;
       }
       editorDirty = false;
-      pendingImageBlob = null;
-      releasePendingImagePreview();
       syncHistoryWithEffectiveCards();
       rebuildDrawPools(false);
       if (currentCard) {
@@ -1457,7 +1320,7 @@
         const images = {};
         for (const imageId of uploadedImageRefs(cardOverrides)) {
           const blob = await getCardImage(imageId);
-          if (!blob) throw new Error('有一張牌卡的本機圖片遺失，請重新選圖後再匯出。');
+          if (!blob) throw new Error('有一張牌卡的本機圖片遺失，請匯入含有完整圖片資料的備份後再試一次。');
           images[imageId] = await blobToDataUrl(blob);
         }
         const backup = {
@@ -1583,8 +1446,6 @@
         customCards = backup.customCards;
         cardOverrides = importedOverrides;
         editorDirty = false;
-        pendingImageBlob = null;
-        releasePendingImagePreview();
         rebuildDrawPools(true);
         currentCard = null;
         selectedEditorCardKey = getAllEffectiveCards()[0]?.key || null;
